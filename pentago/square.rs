@@ -16,6 +16,13 @@ fn spin_coordinates(coords: &mut Vec<i32>, spin: &Vec<usize>) {
     }
 }
 
+fn invert_coordinates(coords: &mut Vec<i32>, length: i32) {
+    let prior_coords = coords.clone();
+    for (i, &prior_coord) in prior_coords.iter().enumerate() {
+        coords[i] = length - 1 - prior_coord;
+    }
+}
+
 #[derive(Debug)]
 pub struct Square {
     pub coordinates: Vec<i32>,

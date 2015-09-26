@@ -24,4 +24,8 @@ impl Board {
         }
     }
 
+    pub fn orient(&self, quadrant_ix: usize, top_corner: &Vec<bool>, spin: &Vec<usize>) -> Vec<Vec<i32>> {
+        self.quadrants[quadrant_ix].orient(&top_corner, &spin, self.length)
+    }
+
 }

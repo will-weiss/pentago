@@ -1,16 +1,19 @@
 use pentago::color;
 use pentago::color::Color;
 
-fn rotate_coordinates(coords: &mut Vec<i32>, x_plane: usize, y_plane: usize, rotations: i32, length: i32) {
-    let mut x = coords[x_plane];
-    let mut y = coords[y_plane];
-    for _ in 0..rotations {
-        let next_x = y;
-        y = length - x - 1;
-        x = next_x;
+fn rotate_coordinates(coords: &mut Vec<i32>, top_corner: &Vec<bool>, length: i32) {
+    for (i, &swap) in top_corner.iter().enumerate() {
+        if swap {
+            coords[i] = length - 1 - coords[i];
+        }
     }
-    coords[x_plane] = x;
-    coords[y_plane] = y;
+}
+
+fn spin_coordinates(coords: &mut Vec<i32>, spin: &Vec<usize>) {
+    let prior_coords = coords.clone();
+    for (i, &use_ix) in spin.iter().enumerate() {
+        coords[i] = prior_coords[use_ix];
+    }
 }
 
 #[derive(Debug)]
@@ -25,5 +28,12 @@ impl Square {
             coordinates: coordinates,
             color: Color::Empty
         }
+    }
+
+    pub fn orient(&self, top_corner: &Vec<bool>, spin: &Vec<usize>, length: i32) -> Vec<i32> {
+        let mut coords = self.coordinates.clone();
+        rotate_coordinates(&mut coords, &top_corner, length);
+        spin_coordinates(&mut coords, &spin);
+        coords
     }
 }

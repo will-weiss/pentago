@@ -20,8 +20,6 @@ fn gen_all_coordinates(dim: i32, length: i32) -> Vec<Vec<i32>> {
 
 #[derive(Debug)]
 pub struct Quadrant {
-    pub dim: i32,
-    pub length: i32,
     pub orientation: i32,
     pub squares: Vec<Square>
 }
@@ -34,10 +32,17 @@ impl Quadrant {
             squares.push(Square::new(coordinates));
         }
         Quadrant {
-            dim: dim,
-            length: length,
             orientation: 0,
             squares: squares
         }
+    }
+
+    pub fn orient(&self, top_corner: &Vec<bool>, spin: &Vec<usize>, length: i32) -> Vec<Vec<i32>> {
+        let mut all_coords = Vec::<Vec<i32>>::new();
+        for square in self.squares.iter() {
+            let coords = square.orient(&top_corner, &spin, length);
+            all_coords.push(coords);
+        }
+        all_coords
     }
 }

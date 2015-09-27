@@ -8,14 +8,20 @@ use pentago::math_utils::{three_raised_to, mult2, mult3};
 
 #[derive(Debug, Clone)]
 pub struct Square {
-    pub color: Color
+    pub color: Option<Color>
 }
 
 impl Square {
     // Generate a new square with assigned coordinates.
     pub fn new() -> Square {
         Square {
-            color: Color::Black
+            color: Some(Color::Black)
+        }
+    }
+
+    pub fn fill(color: &Color) -> Square {
+        Square {
+            color: Some(color.clone())
         }
     }
 }

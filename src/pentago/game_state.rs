@@ -2,50 +2,48 @@ extern crate num;
 
 use std::rc::Rc;
 use pentago::board::Board;
+use pentago::game_configuration::GameConfiguration;
 use self::num::traits::{Zero, One};
 use self::num::bigint::BigUint;
 use pentago::math_utils::{three_raised_to, mult2, mult3};
 
 #[derive(Debug, Clone)]
 pub struct GameState {
+    pub cfg: Rc<GameConfiguration>,
     pub black_to_move: bool,
     pub board: Board
 }
 
 impl GameState {
 
-    pub fn new(num_quadrants: usize, quadrant_size: usize) -> GameState {
+    pub fn new(cfg: Rc<GameConfiguration>) -> GameState {
         GameState {
+            cfg: cfg.clone(),
             black_to_move: true,
-            board: Board::new(num_quadrants, quadrant_size)
+            board: Board::new(cfg)
         }
     }
 
     // Calculate the numeric representation of a given game.
-    pub fn val(&self, quadrant_size: usize) -> BigUint {
-
-        // Keep a tally of the game's value.
-        let mut game_val = BigUint::zero();
-
-        // Loop over the quadrants and their indexes.
-        for (ix, quadrant) in &self.board.quadrants {
-
+    pub fn val(&self) -> BigUint {
+        let enumerated_qs = self.board.quadrants.iter().enumerate();
+        enumerated_qs.fold(BigUint::zero(), |game_val, (ix, quadrant)| {
             // Get the base value of the quadrant.
-            let mut quadrant_val = quadrant.val();
+            let quadrant_val = quadrant.val();
 
-            // No further calculations are necessary if the base value of the
-            // quadrant is zero.
             if (quadrant_val.is_zero()) {
-                continue;
-            }
-
+                // Return the running game value if the quadrant has value zero.
+                game_val
+            } else if (ix == 0) {
+                // If the quadrant index is zero, the quadrant value need not be
+                // multiplied, it is simply added to the running game value.
+                game_val + quadrant_val
             // If the quadrant index is not zero, the quadrant value must be
             // adjusted according to its index.
-            if (ix != &0) {
-
+            } else {
                 // The index of the starting square is the quadrant index
                 // multiplied by the size of a quadrant.
-                let starting_square_ix = (*ix) * (quadrant_size);
+                let starting_square_ix = (ix) * (self.cfg.quadrant_size);
 
                 // The quadrant multiplier is 3 raised to the index of the
                 // quadrant's starting square.
@@ -53,14 +51,19 @@ impl GameState {
 
                 // The quadrant value is multiplied by the multiplier to obtain
                 // the quadrant value to be added to the game value.
-                quadrant_val = quadrant_val * quadrant_multiplier;
+                game_val + (quadrant_val * quadrant_multiplier)
             }
-
-            // Update the game value by adding the quadrant value.
-            game_val = game_val + quadrant_val;
-        }
-
-        // Return the game value.
-        game_val
+        })
     }
+
+    // pub fn placements(&self) -> Vec<GameState> {
+    //     for quadrant in self.board.quadrants() {
+
+    //     }
+    // }
+
+    // pub fn rotations(&self) -> Vec<GameState> {
+
+    // }
+
 }

@@ -34,11 +34,8 @@ impl GameConfiguration {
         }
     }
 
-    pub fn init_state(&self) -> GameState {
-        GameState::new(self.num_quadrants, self.quadrant_size)
+    pub fn init_state(self) -> GameState {
+        GameState::new(Rc::new(self))
     }
 
-    pub fn val(&self, state: GameState) -> BigUint {
-        state.val(self.quadrant_size)
-    }
 }

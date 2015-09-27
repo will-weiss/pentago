@@ -9,7 +9,7 @@ fn main() {
 
     let gs = gc.init_state();
 
-    println!("{:?}", gc.val(gs).to_u64());
+    println!("{:?}", gs.val().to_u64());
 
 }
 

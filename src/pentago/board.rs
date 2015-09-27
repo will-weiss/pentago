@@ -1,6 +1,6 @@
 extern crate num;
 
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use self::num::traits::{Zero, One};
 use self::num::bigint::BigUint;
 use pentago::quadrant;
@@ -12,7 +12,7 @@ use pentago::math_utils::{three_raised_to, mult2, mult3};
 #[derive(Debug, Clone)]
 pub struct Board {
     pub cfg: Rc<GameConfiguration>,
-    pub quadrants: Vec<Quadrant>
+    pub quadrants: Vec<Rc<Quadrant>>
 }
 
 impl Board {
@@ -22,7 +22,7 @@ impl Board {
         Board {
             cfg: cfg.clone(),
             quadrants: cfg.quadrant_coords.iter().map(|_| {
-                Quadrant::new(&cfg)
+                Rc::new(Quadrant::new(&cfg)).clone()
             }).collect()
         }
     }
@@ -33,12 +33,11 @@ impl Board {
             cfg: self.cfg.clone(),
             quadrants: self.quadrants.iter().enumerate().map(|(ix, quadrant)| {
                 if (ix == q_ix) {
-                    quadrant.place(s_ix, color)
+                    Rc::new(quadrant.place(s_ix, color))
                 } else {
                     quadrant.clone()
                 }
             }).collect()
         }
     }
-
 }

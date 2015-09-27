@@ -18,8 +18,8 @@
     // pub fn orient(&self, top_corner: &Vec<bool>, spin: &Vec<usize>, length: &u8)
     //     -> Square {
     //         let mut coordinates = self.coordinates.clone();
-    //         rotate_coordinates(&mut coordinates, &top_corner, &length);
-    //         spin_coordinates(&mut coordinates, &spin);
+    //         rotate_coords(&mut coordinates, &top_corner, &length);
+    //         spin_coords(&mut coordinates, &spin);
     //         Square {
     //             coordinates: coordinates,
     //             color: self.color.clone()
@@ -34,7 +34,7 @@
     // }
 
 
-// fn rotate_coordinates(coords: &mut Vec<u8>, top_corner: &Vec<bool>, length: &u8) {
+// fn rotate_coords(coords: &mut Vec<u8>, top_corner: &Vec<bool>, length: &u8) {
 //     for (i, &swap) in top_corner.iter().enumerate() {
 //         if swap {
 //             coords[i] = length - 1 - coords[i];
@@ -42,14 +42,14 @@
 //     }
 // }
 
-// fn spin_coordinates(coords: &mut Vec<u8>, spin: &Vec<usize>) {
+// fn spin_coords(coords: &mut Vec<u8>, spin: &Vec<usize>) {
 //     let prior_coords = coords.clone();
 //     for (i, &use_ix) in spin.iter().enumerate() {
 //         coords[i] = prior_coords[use_ix];
 //     }
 // }
 
-// fn invert_coordinates(coords: &mut Vec<u8>, length: &u8) {
+// fn invert_coords(coords: &mut Vec<u8>, length: &u8) {
 //     let prior_coords = coords.clone();
 //     for (i, &prior_coord) in prior_coords.iter().enumerate() {
 //         coords[i] = length - 1 - prior_coord;

@@ -13,7 +13,7 @@ use pentago::math_utils::{three_raised_to, mult2, mult3, factorial};
 #[derive(Debug, Clone)]
 pub struct Quadrant {
     pub cfg: Rc<GameConfiguration>,
-    pub squares: Vec<Square>
+    pub squares: Vec<Rc<Square>>
 }
 
 impl Quadrant {
@@ -22,7 +22,7 @@ impl Quadrant {
         Quadrant {
             cfg: cfg.clone(),
             squares: (0..cfg.square_coords.len()).map(|_| {
-                Square::new()
+                Rc::new(Square::new())
             }).collect()
         }
     }
@@ -44,7 +44,7 @@ impl Quadrant {
             cfg: self.cfg.clone(),
             squares: self.squares.iter().enumerate().map(|(ix, square)| {
                 if (ix == square_ix) {
-                    Square::fill(color)
+                    Rc::new(Square::fill(color))
                 } else {
                     square.clone()
                 }
@@ -56,7 +56,6 @@ impl Quadrant {
         let d_i = rotation[0];
         let d_j = rotation[1];
         self.clone()
-
     }
 
 }

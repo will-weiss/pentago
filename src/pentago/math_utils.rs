@@ -13,7 +13,7 @@ pub fn mult3(x: BigUint) -> BigUint {
     _x + x
 }
 
-pub fn three_raised_to(x: u32) -> BigUint {
+pub fn three_raised_to(x: usize) -> BigUint {
     (0..x).fold(BigUint::one(), |exp, _| {
         mult3(exp)
     })

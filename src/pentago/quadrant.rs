@@ -21,7 +21,7 @@ impl Quadrant {
     pub fn new(cfg: &Rc<GameConfiguration>) -> Quadrant {
         Quadrant {
             cfg: cfg.clone(),
-            squares: (0..cfg.square_coordinates.len()).map(|_| {
+            squares: (0..cfg.square_coords.len()).map(|_| {
                 Square::new()
             }).collect()
         }

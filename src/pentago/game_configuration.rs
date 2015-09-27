@@ -15,14 +15,15 @@ pub struct GameConfiguration {
     pub length: usize,
     pub victory: usize,
     pub rotations: Vec<[usize; 2]>,
-    pub quadrant_coordinates: Vec<Vec<usize>>,
-    pub square_coordinates: Vec<Vec<usize>>
+    pub quadrant_coords: Vec<Vec<usize>>,
+    pub square_coords: Vec<Vec<usize>>
 }
 
 // The possible coordinates of a lattice with a given length and dimension.
 fn coordinates(dim: usize, length: usize) -> Vec<Vec<usize>> {
     (0..dim).fold(vec![vec![]], |all_coords, _| {
         Product::new(all_coords.iter(), (0..length)).map(|(coords, c)| {
+            // There has to be a functional way to do this...
             let mut cs = coords.clone();
             cs.push(c);
             cs
@@ -47,8 +48,8 @@ impl GameConfiguration {
             length: length,
             victory: victory,
             rotations: rotations(dim),
-            quadrant_coordinates: coordinates(dim, 2),
-            square_coordinates: coordinates(dim, length)
+            quadrant_coords: coordinates(dim, 2),
+            square_coords: coordinates(dim, length)
         }
     }
 

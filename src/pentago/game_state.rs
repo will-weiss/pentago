@@ -45,7 +45,7 @@ impl GameState {
             } else {
                 // The index of the starting square is the quadrant index
                 // multiplied by the size of a quadrant.
-                let starting_square_ix = (ix) * (self.cfg.square_coordinates.len());
+                let starting_square_ix = (ix) * (self.cfg.square_coords.len());
 
                 // The quadrant multiplier is 3 raised to the index of the
                 // quadrant's starting square.

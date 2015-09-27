@@ -21,7 +21,7 @@ impl Board {
     pub fn new(cfg: Rc<GameConfiguration>) -> Board {
         Board {
             cfg: cfg.clone(),
-            quadrants: cfg.quadrant_coordinates.iter().map(|_| {
+            quadrants: cfg.quadrant_coords.iter().map(|_| {
                 Quadrant::new(&cfg)
             }).collect()
         }

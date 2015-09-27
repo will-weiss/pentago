@@ -1,0 +1,7 @@
+[package]
+name = "pentago"
+version = "0.1.0"
+authors = ["William Weiss <willweiss@maxwellhealth.com>"]
+
+[dependencies]
+num = "*"

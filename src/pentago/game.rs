@@ -13,8 +13,7 @@ pub struct Game {
     pub length: usize,
     pub victory: usize,
     pub num_quadrants: usize,
-    pub quadrant_size: usize,
-    pub board: Board
+    pub quadrant_size: usize
 }
 
 impl Game {
@@ -32,19 +31,22 @@ impl Game {
             length: length,
             victory: victory,
             num_quadrants: num_quadrants,
-            quadrant_size: quadrant_size,
-            board: Board::new(num_quadrants, quadrant_size)
+            quadrant_size: quadrant_size
         }
     }
 
+    pub fn new_board(&self) -> Board {
+        Board::new(self.num_quadrants, self.quadrant_size)
+    }
+
     // Calculate the numeric representation of a given game.
-    pub fn val(&self) -> BigUint {
+    pub fn val(&self, board: Board) -> BigUint {
 
         // Keep a tally of the game's value.
         let mut game_val = BigUint::zero();
 
         // Loop over the quadrants and their indexes.
-        for (ix, quadrant) in &self.board.quadrants {
+        for (ix, quadrant) in &board.quadrants {
 
             // Get the base value of the quadrant.
             let mut quadrant_val = quadrant.val();

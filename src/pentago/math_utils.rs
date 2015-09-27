@@ -18,3 +18,9 @@ pub fn three_raised_to(x: usize) -> BigUint {
         mult3(exp)
     })
 }
+
+pub fn factorial(num: usize) -> usize {
+    (0..num).fold(1, |fact, n| {
+        fact * n
+    })
+}

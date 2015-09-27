@@ -7,11 +7,12 @@ use pentago::game_configuration::GameConfiguration;
 use pentago::square::Square;
 use pentago::color::Color;
 use pentago::color::Color::{Black, White};
-use pentago::math_utils::{three_raised_to, mult2, mult3};
+use pentago::math_utils::{three_raised_to, mult2, mult3, factorial};
 
 
 #[derive(Debug, Clone)]
 pub struct Quadrant {
+    pub cfg: Rc<GameConfiguration>,
     pub squares: Vec<Square>
 }
 
@@ -19,7 +20,8 @@ impl Quadrant {
     // Generate a new quadrant with some number of squares.
     pub fn new(cfg: &Rc<GameConfiguration>) -> Quadrant {
         Quadrant {
-            squares: (0..cfg.quadrant_size).map(|_| {
+            cfg: cfg.clone(),
+            squares: (0..cfg.square_coordinates.len()).map(|_| {
                 Square::new()
             }).collect()
         }
@@ -36,8 +38,10 @@ impl Quadrant {
         })
     }
 
+    // Place a stone of a given color at a square given by its index.
     pub fn place(&self, square_ix: usize, color: &Color) -> Quadrant {
         Quadrant {
+            cfg: self.cfg.clone(),
             squares: self.squares.iter().enumerate().map(|(ix, square)| {
                 if (ix == square_ix) {
                     Square::fill(color)
@@ -46,6 +50,13 @@ impl Quadrant {
                 }
             }).collect()
         }
+    }
+
+    pub fn rotate(&self, rotation: [usize; 2]) -> Quadrant {
+        let d_i = rotation[0];
+        let d_j = rotation[1];
+        self.clone()
+
     }
 
 }

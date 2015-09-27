@@ -16,45 +16,29 @@ pub struct Board {
 }
 
 impl Board {
+
     // Generate a new board with some number of quadrants of a given size.
     pub fn new(cfg: Rc<GameConfiguration>) -> Board {
         Board {
             cfg: cfg.clone(),
-            quadrants: (0..cfg.num_quadrants).map(|_| {
+            quadrants: cfg.quadrant_coordinates.iter().map(|_| {
                 Quadrant::new(&cfg)
             }).collect()
         }
     }
 
-    pub fn place(&self, quadrant_ix: usize, square_ix: usize, color: &Color) -> Board {
+    // Place a stone of a given color at a square given by its indexes.
+    pub fn place(&self, q_ix: usize, s_ix: usize, color: &Color) -> Board {
         Board {
             cfg: self.cfg.clone(),
             quadrants: self.quadrants.iter().enumerate().map(|(ix, quadrant)| {
-                if (ix == quadrant_ix) {
-                    quadrant.place(square_ix, color)
+                if (ix == q_ix) {
+                    quadrant.place(s_ix, color)
                 } else {
                     quadrant.clone()
                 }
             }).collect()
         }
     }
-
-
-
-
-    // pub fn orient(&self, quadrant_ix: usize, top_corner: &Vec<bool>, spin: &Vec<usize>) -> Board {
-    //     Board {
-    //         dim: self.dim,
-    //         length: self.length,
-    //         quadrants: self.quadrants.iter().enumerate().map(|(ix, quadrant)| {
-    //             if (ix == quadrant_ix) {
-    //                 quadrant.orient(&top_corner, &spin, &self.length)
-    //             } else {
-    //                 quadrant.clone()
-    //             }
-    //         }).collect()
-    //     }
-    // }
-
 
 }

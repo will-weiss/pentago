@@ -5,3 +5,4 @@ authors = ["William Weiss <willweiss@maxwellhealth.com>"]
 
 [dependencies]
 num = "*"
+itertools = "*"

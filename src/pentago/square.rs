@@ -15,7 +15,7 @@ impl Square {
     // Generate a new square with assigned coordinates.
     pub fn new() -> Square {
         Square {
-            color: Some(Color::Black)
+            color: None
         }
     }
 
@@ -24,4 +24,19 @@ impl Square {
             color: Some(color.clone())
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        match self.color {
+            None => true,
+            _ => false
+        }
+    }
+
+    pub fn is_black(&self) -> bool {
+        match self.color {
+            Some(Color::Black) => true,
+            _ => false
+        }
+    }
+
 }

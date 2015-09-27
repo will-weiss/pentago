@@ -55,3 +55,24 @@
 //         coords[i] = length - 1 - prior_coord;
 //     }
 // }
+//
+// OLD BOARD
+//
+
+
+
+    // pub fn orient(&self, quadrant_ix: usize, top_corner: &Vec<bool>, spin: &Vec<usize>) -> Board {
+    //     Board {
+    //         dim: self.dim,
+    //         length: self.length,
+    //         quadrants: self.quadrants.iter().enumerate().map(|(ix, quadrant)| {
+    //             if (ix == quadrant_ix) {
+    //                 quadrant.orient(&top_corner, &spin, &self.length)
+    //             } else {
+    //                 quadrant.clone()
+    //             }
+    //         }).collect()
+    //     }
+    // }
+
+

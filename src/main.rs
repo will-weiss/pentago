@@ -2,18 +2,14 @@ mod pentago;
 extern crate num;
 
 use self::num::traits::ToPrimitive;
-
+use pentago::game_configuration::GameConfiguration;
 
 fn main() {
-    let g = pentago::game::Game::new(2, 3, 5);
+    let gc = GameConfiguration::new(2, 3, 5);
 
-    let b = g.new_board();
+    let gs = gc.init_state();
 
-    println!("{:?}", g.val(b).to_u64());
-
-    // let b = g.board.orient(1, &vec![true, true, false], &vec![1, 2, 0]);
-
-    // println!("{:?}", b.quadrants[1]);
+    println!("{:?}", gc.val(gs).to_u64());
 
 }
 

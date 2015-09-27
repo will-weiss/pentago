@@ -75,8 +75,7 @@ impl GameState {
 
     pub fn possible_placements(&self) -> Vec<GameState> {
         let color = self.to_move();
-
-        let mut placement_states: Vec<_> = Vec::new();
+        let mut placement_states = vec![];
 
         for (q_ix, q) in self.board.quadrants.iter().enumerate() {
             for (s_ix, s) in q.squares.iter().enumerate() {

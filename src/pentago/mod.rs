@@ -1,7 +1,9 @@
 pub mod board;
 pub mod color;
+pub mod coordinates;
 pub mod game_configuration;
 pub mod game_state;
 pub mod quadrant;
 pub mod square;
+pub mod coordinate_utils;
 pub mod math_utils;

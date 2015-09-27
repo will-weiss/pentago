@@ -40,4 +40,5 @@ impl Board {
             }).collect()
         }
     }
+
 }

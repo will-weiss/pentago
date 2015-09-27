@@ -52,11 +52,20 @@ impl Quadrant {
         }
     }
 
-    pub fn rotate(&self, rotation: [usize; 2]) -> Quadrant {
-        let d_i = rotation[0];
-        let d_j = rotation[1];
-        self.clone()
-    }
+    // pub fn rotate(&self, rotation: [usize; 2]) -> Quadrant {
+    //     let d_i = rotation[0];
+    //     let d_j = rotation[1];
+    //     let square_coords = self.cfg.square_coords
+    //     Quadrant {
+    //         cfg: self.cfg.clone(),
+    //         self.squares.iter().enumerate().map(|(ix, square)| {
+    //             let color = square.color;
+    //             let coords = square_coords[ix];
+
+
+    //         }).collect()
+    //     }
+    // }
 
 }
 

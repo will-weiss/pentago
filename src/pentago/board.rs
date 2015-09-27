@@ -13,11 +13,13 @@ pub struct Board {
 }
 
 impl Board {
+    // Generate a new board with some number of quadrants of a given size.
     pub fn new(num_quadrants: usize, quadrant_size: usize) -> Board {
-        let mut quadrants = HashMap::with_capacity(num_quadrants as usize);
+
+        let mut quadrants = HashMap::with_capacity(num_quadrants);
 
         for quadrant_ix in 0..num_quadrants {
-            quadrants.insert((quadrant_ix as usize), Quadrant::new(quadrant_size));
+            quadrants.insert((quadrant_ix), Quadrant::new(quadrant_size));
         }
 
         Board {
@@ -25,23 +27,6 @@ impl Board {
         }
     }
 
-    // Get a (big) integer representing the value of this square.
-    pub fn val(&self, quadrant_size: &usize) -> BigUint {
-        let mut val = BigUint::zero();
-
-        for (ix, quadrant) in &self.quadrants {
-            let mut quadrant_val = quadrant.val();
-            if (quadrant_val.is_zero()) {
-                continue;
-            }
-            if (ix != &0) {
-                quadrant_val = quadrant_val * (three_raised_to((*ix) * (*quadrant_size)));
-            }
-            val = val + quadrant_val;
-        }
-
-        val
-    }
 
 
     // pub fn orient(&self, quadrant_ix: usize, top_corner: &Vec<bool>, spin: &Vec<usize>) -> Board {

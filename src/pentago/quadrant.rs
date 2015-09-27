@@ -14,8 +14,7 @@ pub struct Quadrant {
 }
 
 impl Quadrant {
-    // Generate a new quadrant with assigned coordinates for some dimesion and
-    // length.
+    // Generate a new quadrant with some number of squares.
     pub fn new(quadrant_size: usize) -> Quadrant {
 
         let mut squares = HashMap::with_capacity(quadrant_size);

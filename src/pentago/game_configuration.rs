@@ -3,7 +3,7 @@ extern crate itertools;
 
 use std::rc::Rc;
 use pentago::game_state::GameState;
-use pentago::coordinates::Coordinates;
+use pentago::square_configuration::SquareCfgList;
 use pentago::coordinate_utils::{get_coordinates, apply_rotation, get_rotations};
 
 
@@ -12,9 +12,8 @@ pub struct GameConfiguration {
     pub dim: usize,
     pub length: usize,
     pub victory: usize,
-    // pub possible_coordinates: Vec<Coordinates>,
-    pub quadrant_coords: Vec<Vec<usize>>,
-    pub square_coords: Vec<Vec<usize>>,
+    pub square_cfgs: SquareCfgList,
+    pub quadrant_coords: Vec<Vec<usize>>
 }
 
 
@@ -26,8 +25,8 @@ impl GameConfiguration {
             dim: dim,
             length: length,
             victory: victory,
-            quadrant_coords: get_coordinates(dim, 2),
-            square_coords: get_coordinates(dim, length)
+            square_cfgs: SquareCfgList::new(dim, length),
+            quadrant_coords: get_coordinates(dim, 2)
         }
     }
 

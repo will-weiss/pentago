@@ -3,13 +3,12 @@ extern crate num;
 use std::rc::Rc;
 use self::num::traits::{Zero, One, ToPrimitive};
 use self::num::bigint::BigUint;
-use pentago::coordinates::Coordinates;
+// use pentago::coordinates::Coordinates;
 use pentago::color::Color;
 use pentago::math_utils::{three_raised_to, mult2, mult3};
 
 #[derive(Debug, Clone)]
 pub struct Square {
-    // pub coordinates: Rc<Coordinates>,
     pub color: Option<Color>
 }
 

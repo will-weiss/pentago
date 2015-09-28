@@ -4,6 +4,7 @@ extern crate itertools;
 use std::rc::Rc;
 use pentago::game_state::GameState;
 use pentago::lattice::Lattice;
+use pentago::point::Point;
 
 
 #[derive(Debug, Clone)]
@@ -11,8 +12,8 @@ pub struct GameConfiguration {
     pub dim: usize,
     pub length: usize,
     pub victory: usize,
-    pub squares: Lattice,
-    pub quadrants: Lattice
+    pub squares: Vec<Point>,
+    pub quadrants: Vec<Point>
 }
 
 
@@ -24,17 +25,13 @@ impl GameConfiguration {
             dim: dim,
             length: length,
             victory: victory,
-            squares: Lattice::new(dim, length),
-            quadrants: Lattice::new(dim, 2),
+            squares: Lattice::new(dim, length).points,
+            quadrants: Lattice::new(dim, 2).points,
         }
     }
 
     pub fn init_state(self) -> GameState {
         GameState::new(Rc::new(self))
     }
-
-    // pub fn rotate(&self, rotation: [usize; 2]) -> usize {
-
-    // }
 
 }

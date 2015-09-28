@@ -21,7 +21,7 @@ impl Quadrant {
     pub fn new(cfg: &Rc<GameConfiguration>) -> Quadrant {
         Quadrant {
             cfg: cfg.clone(),
-            squares: (0..cfg.squares.points.len()).map(|_| {
+            squares: (0..cfg.squares.len()).map(|_| {
                 Rc::new(Square::new())
             }).collect()
         }
@@ -29,12 +29,8 @@ impl Quadrant {
 
     // Get a (big) integer representing the value of this square.
     pub fn val(&self) -> BigUint {
-        self.squares.iter().enumerate().fold(BigUint::zero(), |val, (ix, square)| {
-            match square.color {
-                None => val,
-                Some(White) => val + three_raised_to(ix),
-                Some(Black) => val + mult2(three_raised_to(ix))
-            }
+        self.squares.iter().fold(BigUint::zero(), |val, (square)| {
+            val + square.val()
         })
     }
 
@@ -52,17 +48,16 @@ impl Quadrant {
         }
     }
 
-    // pub fn rotate(&self, rotation: [usize; 2]) -> Quadrant {
-    //     let d_i = rotation[0];
-    //     let d_j = rotation[1];
-    //     let square_coords = self.cfg.square_coords
+    // pub fn rotate(&self, rotation: usize) -> Quadrant {
     //     Quadrant {
     //         cfg: self.cfg.clone(),
-    //         self.squares.iter().enumerate().map(|(ix, square)| {
-    //             let color = square.color;
-    //             let coords = square_coords[ix];
+    //         squares: self.squares.iter().enumerate().map(|(ix, square)| {
 
-
+    //             if (ix == square_ix) {
+    //                 Rc::new(Square::fill(color))
+    //             } else {
+    //                 square.clone()
+    //             }
     //         }).collect()
     //     }
     // }

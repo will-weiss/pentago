@@ -1,23 +1,10 @@
 extern crate itertools;
 use self::itertools::Product;
 use std::rc::Rc;
-
-#[derive(Debug, Clone)]
-pub struct Point {
-    pub coordinates: Vec<usize>,
-    pub rotations: Vec<usize>
-}
-
-#[derive(Debug, Clone)]
-pub struct Lattice {
-    pub dim: usize,
-    pub length: usize,
-    pub points: Vec<Rc<Point>>
-}
-
+use pentago::point::Point;
 
 // The possible coordinates of a lattice with a given length and dimension.
-pub fn get_coordinates(dim: usize, length: usize) -> Vec<Vec<usize>> {
+fn get_coordinates(dim: usize, length: usize) -> Vec<Vec<usize>> {
     (0..dim).fold(vec![vec![]], |all_coords, _| {
         Product::new(all_coords.iter(), (0..length)).map(|(coords, c)| {
             // There has to be a functional way to do this...
@@ -28,8 +15,9 @@ pub fn get_coordinates(dim: usize, length: usize) -> Vec<Vec<usize>> {
     })
 }
 
+
 // The possible choices of rotation.
-pub fn get_rotations(dim: usize) -> Vec<[usize; 2]> {
+fn get_rotations(dim: usize) -> Vec<[usize; 2]> {
     Product::new((0..dim), (0..dim))
         .filter(|&(d_i, d_j)| { d_i != d_j })
         .map(|(d_i, d_j)| { [d_i, d_j] })
@@ -37,38 +25,42 @@ pub fn get_rotations(dim: usize) -> Vec<[usize; 2]> {
 }
 
 
-fn to_usize(dim: usize, length: usize, coords: Vec<usize>) -> usize {
-    coords.iter().enumerate().fold(0, |n, (ix, c)| {
-        n + (c * length.pow((dim - ix - 1) as u32))
-    })
-}
-
-fn apply_rotation(length: usize, coordinates: &Vec<usize>, rotation: &[usize; 2]) -> Vec<usize> {
-    let d_i = rotation[0];
-    let d_j = rotation[1];
-    let mut rotated_coordinates = coordinates.clone();
-    rotated_coordinates[d_i] = length - 1 - coordinates[d_j];
-    rotated_coordinates[d_j] = coordinates[d_i];
-    rotated_coordinates
+#[derive(Debug, Clone)]
+pub struct Lattice {
+    pub dim: usize,
+    pub length: usize,
+    pub points: Vec<Point>,
+    pub rotations: Vec<Vec<Point>>
 }
 
 impl Lattice {
 
     pub fn new(dim: usize, length: usize) -> Lattice {
-        let all_coordinates = get_coordinates(dim, length);
-        let rotations = get_rotations(dim);
+        let points: Vec<Point> = get_coordinates(dim, length).iter().enumerate()
+            .map(|(ix, coordinates)| {
+                Point {
+                    dim: dim,
+                    length: length,
+                    coordinates: coordinates.clone()
+                }
+            }).collect();
+
+        let mut rotations: Vec<Vec<Point>> = vec![];
+        {
+            for rotation in get_rotations(dim) {
+                rotations.push(points.iter().map(|point| {
+                    point.apply_rotation(&rotation)
+                }).collect());
+            }
+        }
 
         Lattice {
             dim: dim,
             length: length,
-            points: all_coordinates.iter().map(|coordinates| {
-                Rc::new(Point {
-                    coordinates: coordinates.clone(),
-                    rotations: rotations.iter().map(|rotation| {
-                        to_usize(dim, length, apply_rotation(length, coordinates, rotation))
-                    }).collect()
-                })
-            }).collect()
+            points: points,
+            rotations: rotations
         }
+
     }
 }
+

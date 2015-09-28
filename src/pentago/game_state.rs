@@ -10,9 +10,16 @@ use self::num::bigint::BigUint;
 use pentago::math_utils::{three_raised_to, mult2, mult3};
 
 #[derive(Debug, Clone)]
+pub enum GameResult {
+    BlackWin,
+    WhiteWin
+}
+
+#[derive(Debug, Clone)]
 pub struct GameState {
     pub cfg: Rc<GameConfiguration>,
     pub black_to_move: bool,
+    pub result: Option<GameResult>,
     pub board: Board
 }
 
@@ -22,6 +29,7 @@ impl GameState {
         GameState {
             cfg: cfg.clone(),
             black_to_move: true,
+            result: None,
             board: Board::new(cfg)
         }
     }
@@ -45,7 +53,7 @@ impl GameState {
             } else {
                 // The index of the starting square is the quadrant index
                 // multiplied by the size of a quadrant.
-                let starting_square_ix = (ix) * (self.cfg.squares.points.len());
+                let starting_square_ix = (ix) * (self.cfg.squares.len());
 
                 // The quadrant multiplier is 3 raised to the index of the
                 // quadrant's starting square.
@@ -69,6 +77,7 @@ impl GameState {
         GameState {
             cfg: self.cfg.clone(),
             black_to_move: !self.black_to_move,
+            result: None,
             board: self.board.place(q_ix, s_ix, color)
         }
     }

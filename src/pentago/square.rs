@@ -3,26 +3,29 @@ extern crate num;
 use std::rc::Rc;
 use self::num::traits::{Zero, One, ToPrimitive};
 use self::num::bigint::BigUint;
-// use pentago::coordinates::Coordinates;
+use pentago::point::Point;
 use pentago::color::Color;
+use pentago::color::Color::{Black, White};
 use pentago::math_utils::{three_raised_to, mult2, mult3};
 
 #[derive(Debug, Clone)]
 pub struct Square {
-    pub color: Option<Color>
+    pub color: Option<&Color>
 }
 
 impl Square {
     // Generate a new square with assigned coordinates.
     pub fn new() -> Square {
         Square {
+            point: Rc<Point>,
             color: None
         }
     }
 
-    pub fn fill(color: &Color) -> Square {
+    pub fn fill(&self, color: &Color) -> Square {
         Square {
-            color: Some(color.clone())
+            point: self.point.clone(),
+            color: Some(color)
         }
     }
 
@@ -35,8 +38,16 @@ impl Square {
 
     pub fn is_black(&self) -> bool {
         match self.color {
-            Some(Color::Black) => true,
+            Some(&Black) => true,
             _ => false
+        }
+    }
+
+    pub fn val(&self) -> BigUint {
+        match self.color {
+            None => BigUint::zero(),
+            Some(&White) => three_raised_to(ix),
+            Some(&Black) => mult2(three_raised_to(ix))
         }
     }
 

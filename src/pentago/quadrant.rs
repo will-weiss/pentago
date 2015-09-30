@@ -1,5 +1,7 @@
 extern crate num;
+extern crate itertools;
 
+use self::itertools::Product;
 use std::rc::Rc;
 use self::num::traits::{Zero, One, ToPrimitive};
 use self::num::bigint::BigUint;
@@ -21,15 +23,15 @@ impl Quadrant {
     pub fn new(cfg: &Rc<GameConfiguration>) -> Quadrant {
         Quadrant {
             cfg: cfg.clone(),
-            squares: (0..cfg.squares.len()).map(|_| {
-                Rc::new(Square::new())
+            squares: cfg.squares.points.iter().map(|point| {
+                Rc::new(Square::new(point.clone()))
             }).collect()
         }
     }
 
     // Get a (big) integer representing the value of this square.
     pub fn val(&self) -> BigUint {
-        self.squares.iter().fold(BigUint::zero(), |val, (square)| {
+        self.squares.iter().fold(BigUint::zero(), |val, square| {
             val + square.val()
         })
     }
@@ -40,7 +42,7 @@ impl Quadrant {
             cfg: self.cfg.clone(),
             squares: self.squares.iter().enumerate().map(|(ix, square)| {
                 if (ix == square_ix) {
-                    Rc::new(Square::fill(color))
+                    Rc::new(square.fill(&color))
                 } else {
                     square.clone()
                 }
@@ -48,19 +50,22 @@ impl Quadrant {
         }
     }
 
-    // pub fn rotate(&self, rotation: usize) -> Quadrant {
-    //     Quadrant {
-    //         cfg: self.cfg.clone(),
-    //         squares: self.squares.iter().enumerate().map(|(ix, square)| {
+    pub fn rotate(&self, rotation: usize) -> Quadrant {
+        let q_cfg = self.cfg.quadrants;
 
-    //             if (ix == square_ix) {
-    //                 Rc::new(Square::fill(color))
-    //             } else {
-    //                 square.clone()
-    //             }
-    //         }).collect()
-    //     }
-    // }
+        let rotated_square_indexes = q_cfg.rotations[rotation];
+
+        for (ix, square) in Product::new(rotated_square_indexes.iter(), (&self.squares).iter()) {
+
+        }
+
+        Quadrant {
+            cfg: self.cfg.clone(),
+            squares:
+        }
+
+
+    }
 
 }
 

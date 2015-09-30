@@ -12,8 +12,8 @@ pub struct GameConfiguration {
     pub dim: usize,
     pub length: usize,
     pub victory: usize,
-    pub squares: Vec<Point>,
-    pub quadrants: Vec<Point>
+    pub squares: Lattice,
+    pub quadrants: Lattice,
 }
 
 
@@ -25,8 +25,8 @@ impl GameConfiguration {
             dim: dim,
             length: length,
             victory: victory,
-            squares: Lattice::new(dim, length).points,
-            quadrants: Lattice::new(dim, 2).points,
+            squares: Lattice::new(dim, length),
+            quadrants: Lattice::new(dim, 2),
         }
     }
 

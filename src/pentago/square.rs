@@ -10,14 +10,15 @@ use pentago::math_utils::{three_raised_to, mult2, mult3};
 
 #[derive(Debug, Clone)]
 pub struct Square {
-    pub color: Option<&Color>
+    pub point: Rc<Point>,
+    pub color: Option<Color>
 }
 
 impl Square {
     // Generate a new square with assigned coordinates.
-    pub fn new() -> Square {
+    pub fn new(point: Rc<Point>) -> Square {
         Square {
-            point: Rc<Point>,
+            point: point,
             color: None
         }
     }
@@ -25,7 +26,7 @@ impl Square {
     pub fn fill(&self, color: &Color) -> Square {
         Square {
             point: self.point.clone(),
-            color: Some(color)
+            color: Some(color.clone())
         }
     }
 
@@ -38,7 +39,7 @@ impl Square {
 
     pub fn is_black(&self) -> bool {
         match self.color {
-            Some(&Black) => true,
+            Some(Black) => true,
             _ => false
         }
     }
@@ -46,8 +47,8 @@ impl Square {
     pub fn val(&self) -> BigUint {
         match self.color {
             None => BigUint::zero(),
-            Some(&White) => three_raised_to(ix),
-            Some(&Black) => mult2(three_raised_to(ix))
+            Some(White) => three_raised_to(self.point.ix),
+            Some(Black) => mult2(three_raised_to(self.point.ix))
         }
     }
 

@@ -10,16 +10,23 @@ use pentago::math_utils::{three_raised_to, mult2, mult3};
 
 #[derive(Debug, Clone)]
 pub struct Square {
-    pub point: Rc<Point>,
+    pub point: Point,
     pub color: Option<Color>
 }
 
 impl Square {
     // Generate a new square with assigned coordinates.
-    pub fn new(point: Rc<Point>) -> Square {
+    pub fn new(point: Point) -> Square {
         Square {
             point: point,
             color: None
+        }
+    }
+
+    pub fn rotate(&self, direction: usize) -> Square {
+        Square {
+            point: self.point.rotate(direction),
+            color: self.color.clone()
         }
     }
 

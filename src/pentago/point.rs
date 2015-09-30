@@ -5,21 +5,23 @@ use pentago::lattice::Lattice;
 
 #[derive(Debug, Clone)]
 pub struct Point {
+    lattice: Rc<Lattice>,
     pub ix: usize,
-    pub dim: usize,
-    pub length: usize,
-    pub coordinates: Vec<usize>
 }
 
 impl Point {
+    pub fn rotate(&self, rotation_ix: usize) -> Point {
+        Point {
+            lattice: self.lattice.clone(),
+            ix: self.lattice.rotations[rotation_ix][self.ix],
+        }
+    }
 
-    pub fn apply_rotation(&self, rotation: &[usize; 2]) -> Vec<usize> {
-        let d_i = rotation[0];
-        let d_j = rotation[1];
-        let mut rotated_coordinates = self.coordinates.clone();
-        rotated_coordinates[d_i] = self.length - 1 - self.coordinates[d_j];
-        rotated_coordinates[d_j] = self.coordinates[d_i];
-        rotated_coordinates
+    pub fn new(lattice: Rc<Lattice>, ix: usize) -> Point {
+        Point {
+            lattice: lattice,
+            ix: ix
+        }
     }
 
 }

@@ -38,13 +38,13 @@ impl Lattice {
         let rotation_planes = self.get_rotation_planes();
         (&rotation_planes).iter().map(|rotation_plane| {
             (&self.coordinates).iter().map(|c| {
-                let rotated_coordinates = self.apply_rotation_plane(&c, &rotation_plane);
-                self.to_usize(&rotated_coordinates)
+                let rotated_cs = self.apply_rotation(&c, &rotation_plane);
+                self.to_usize(&rotated_cs)
             }).collect()
         }).collect()
     }
 
-    fn apply_rotation_plane(&self, coordinates: &Vec<usize>, rotation_plane: &[usize; 2]) -> Vec<usize> {
+    fn apply_rotation(&self, coordinates: &Vec<usize>, rotation_plane: &[usize; 2]) -> Vec<usize> {
         let d_i = rotation_plane[0];
         let d_j = rotation_plane[1];
         let mut rotated_coordinates = coordinates.clone();

@@ -30,7 +30,7 @@ impl Square {
         }
     }
 
-    pub fn fill(&self, color: &Color) -> Square {
+    pub fn place(&self, color: &Color) -> Square {
         Square {
             point: self.point.clone(),
             color: Some(color.clone())

@@ -39,7 +39,7 @@ impl Quadrant {
         Quadrant {
             squares: self.squares.iter().enumerate().map(|(ix, square)| {
                 if (ix == square_ix) {
-                    Rc::new(square.fill(&color))
+                    Rc::new(square.place(&color))
                 } else {
                     square.clone()
                 }
@@ -48,7 +48,6 @@ impl Quadrant {
     }
 
     pub fn rotate(&self, direction: usize) -> Quadrant {
-
         Quadrant {
             squares: self.squares.iter().map(|square| {
                 Rc::new(square.rotate(direction))

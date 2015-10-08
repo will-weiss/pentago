@@ -98,6 +98,15 @@ impl GameState {
 
     }
 
+    pub fn rotate(&self, q_ix: usize, direction: usize) -> GameState {
+        GameState {
+            cfg: self.cfg.clone(),
+            black_to_move: self.black_to_move,
+            result: None,
+            board: self.board.rotate(q_ix, direction)
+        }
+    }
+
     // pub fn rotations(&self) -> Vec<GameState> {
 
     // }

@@ -5,15 +5,16 @@ use pentago::lattice::Lattice;
 
 #[derive(Debug, Clone)]
 pub struct Point {
-    lattice: Rc<Lattice>,
+    pub lattice: Rc<Lattice>,
     pub ix: usize,
 }
 
 impl Point {
-    pub fn rotate(&self, rotation_ix: usize) -> Point {
+
+    pub fn rotate(&self, direction: usize) -> Point {
         Point {
             lattice: self.lattice.clone(),
-            ix: self.lattice.rotations[rotation_ix][self.ix],
+            ix: self.lattice.rotations[direction][self.ix],
         }
     }
 

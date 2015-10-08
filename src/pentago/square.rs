@@ -23,13 +23,6 @@ impl Square {
         }
     }
 
-    pub fn rotate(&self, direction: usize) -> Square {
-        Square {
-            point: self.point.rotate(direction),
-            color: self.color.clone()
-        }
-    }
-
     pub fn place(&self, color: &Color) -> Square {
         Square {
             point: self.point.clone(),

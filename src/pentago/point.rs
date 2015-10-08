@@ -11,11 +11,8 @@ pub struct Point {
 
 impl Point {
 
-    pub fn rotate(&self, direction: usize) -> Point {
-        Point {
-            lattice: self.lattice.clone(),
-            ix: self.lattice.rotations[direction][self.ix],
-        }
+    pub fn rotate(&self, direction: usize) -> usize {
+        self.lattice.rotations[direction][self.ix]
     }
 
     pub fn new(lattice: Rc<Lattice>, ix: usize) -> Point {

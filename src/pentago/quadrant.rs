@@ -49,8 +49,11 @@ impl Quadrant {
 
     pub fn rotate(&self, direction: usize) -> Quadrant {
         Quadrant {
-            squares: self.squares.iter().map(|square| {
-                Rc::new(square.rotate(direction))
+            squares: (&self.squares).iter().map(|square| {
+                Rc::new(Square {
+                    point: square.point.clone(),
+                    color: self.squares[square.point.rotate(direction)].color.clone()
+                })
             }).collect()
         }
     }

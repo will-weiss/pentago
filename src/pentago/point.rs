@@ -22,4 +22,8 @@ impl Point {
         }
     }
 
+    pub fn coordinates_of(&self) -> &Vec<usize> {
+        &self.lattice.coordinates[self.ix]
+    }
+
 }

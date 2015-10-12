@@ -1,5 +1,6 @@
 extern crate num;
 
+use std::collections::VecDeque;
 use std::rc::{Rc, Weak};
 use self::num::traits::{Zero, One};
 use self::num::bigint::BigUint;
@@ -11,17 +12,22 @@ use pentago::math_utils::{three_raised_to, mult2, mult3};
 
 #[derive(Debug, Clone)]
 pub struct Board {
-    pub quadrants: Vec<Rc<Quadrant>>
+    pub quadrants: VecDeque<Rc<Quadrant>>
 }
 
 impl Board {
 
     // Generate a new board with some number of quadrants of a given size.
     pub fn new(cfg: Rc<GameConfiguration>) -> Board {
+        let num_q = (&cfg.quadrants).len();
+        let mut quadrants = VecDeque::with_capacity(num_q);
+
+        for _ in 0..num_q {
+            quadrants.push_back(Rc::new(Quadrant::new(&cfg)).clone());
+        }
+
         Board {
-            quadrants: cfg.quadrants.iter().map(|_| {
-                Rc::new(Quadrant::new(&cfg)).clone()
-            }).collect()
+            quadrants: quadrants
         }
     }
 
@@ -49,5 +55,14 @@ impl Board {
             }).collect()
         }
     }
+
+    pub fn rotate_whole(&self, direction: usize) -> Board {
+        Board {
+            quadrants: self.quadrants.iter().map(|quadrant| {
+                Rc::new(quadrant.rotate(direction))
+            }).collect()
+        }
+    }
+
 
 }

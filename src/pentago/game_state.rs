@@ -107,7 +107,23 @@ impl GameState {
         }
     }
 
-    // pub fn rotations(&self) -> Vec<GameState> {
+    pub fn rotate_whole(&self, direction: usize) -> GameState {
+        GameState {
+            cfg: self.cfg.clone(),
+            black_to_move: self.black_to_move,
+            result: None,
+            board: self.board.rotate_whole(direction)
+        }
+    }
+
+    // pub fn min_representation(&self) -> GameState {
+    //     let states = self.cfg.q_lattice.rotations.iter.enumerate()
+    //         .map(|(direction, _)| {
+    //             self.rotate_whole(direction)
+    //         });
+
+
+
 
     // }
 

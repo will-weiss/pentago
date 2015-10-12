@@ -13,7 +13,9 @@ pub struct GameConfiguration {
     pub length: usize,
     pub victory: usize,
     pub squares: Vec<Point>,
+    pub sq_lattice: Rc<Lattice>,
     pub quadrants: Vec<Point>,
+    pub q_lattice: Rc<Lattice>
 }
 
 
@@ -21,12 +23,20 @@ impl GameConfiguration {
     // Create a new Game of a given dimension, quadrant length, and number of
     // squares in a row that indicate victory.
     pub fn new(dim: usize, length: usize, victory: usize) -> GameConfiguration {
+        let squares = Lattice::points(dim, length);
+        let sq_lattice = (&squares)[0].lattice.clone();
+        let quadrants = Lattice::points(dim, 2);
+        let q_lattice = (&quadrants)[0].lattice.clone();
+
+
         GameConfiguration {
             dim: dim,
             length: length,
             victory: victory,
-            squares: Lattice::points(dim, length),
-            quadrants: Lattice::points(dim, 2),
+            squares: squares,
+            quadrants: quadrants,
+            sq_lattice: sq_lattice,
+            q_lattice: q_lattice
         }
     }
 

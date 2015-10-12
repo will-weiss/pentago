@@ -18,7 +18,7 @@ impl Square {
     // Generate a new square with assigned coordinates.
     pub fn new(point: Point) -> Square {
         Square {
-            point: point,
+            point: point.clone(),
             color: None
         }
     }

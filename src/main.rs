@@ -13,23 +13,41 @@ fn val_of(gs: &GameState) {
 
 fn main() {
     let gc = GameConfiguration::new(2, 3, 5);
-    let s0 = gc.init_state();
-    val_of(&s0);
-    let s1 = s0.place(0, 0, &White);
-    val_of(&s1);
 
 
-    let mut s = s1.rotate(0, 1);
-    val_of(&s);
+    // let s0 = gc.init_state();
 
-    s = s.rotate(0, 1);
-    val_of(&s);
+    // s0.min_representation();
 
-    s = s.rotate(0, 1);
-    val_of(&s);
+    // val_of(&s0);
+    // let s1 = s0.place(0, 0, &White);
+    // val_of(&s1);
 
-    s = s.rotate(0, 1);
-    val_of(&s);
+
+
+
+    // let mut s = s1.rotate(0, 1);
+
+    // for q in &s.board.quadrants {
+    //     for s in &q.squares {
+    //         println!("{:?}", s.color);
+    //     }
+    // }
+
+    // println!("{:?}", s.board.quadrants);
+
+    // println!("{:?}", s);
+
+    // val_of(&s);
+
+    // s = s.rotate(0, 1);
+    // val_of(&s);
+
+    // s = s.rotate(0, 1);
+    // val_of(&s);
+
+    // s = s.rotate(0, 1);
+    // val_of(&s);
 
 
 

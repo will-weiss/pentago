@@ -35,27 +35,28 @@ pub enum DimDir {
 
 pub type LineDir = Vec<DimDir>;
 
-fn init_line_direction(dim: usize) -> LineDir {
-    let mut ld = vec![DimDir::Null; dim - 1];
+fn init_line_direction(prior_dim: usize) -> LineDir {
+    let mut ld = vec![DimDir::Null; prior_dim];
     ld.push(DimDir::Forward);
     ld
+}
+
+fn non_negative_line_directions(prior_dim: usize) -> Vec<LineDir> {
+    let mut next_directions = vec![init_line_direction(prior_dim)];
+    for prior_dir in distinct_line_directions(prior_dim).iter() {
+        for dir in [DimDir::Null, DimDir::Forward, DimDir::Backward].iter() {
+            let mut next_dir = prior_dir.clone();
+            next_dir.push(dir.clone());
+            next_directions.push(next_dir);
+        }
+    }
+    next_directions
 }
 
 fn distinct_line_directions(dim: usize) -> Vec<LineDir> {
     match dim {
         0 => vec![],
-        _ => {
-            let prior_directions = distinct_line_directions(dim - 1);
-            let mut next_directions = vec![init_line_direction(dim)];
-            for prior in prior_directions.iter() {
-                for dir in [DimDir::Null, DimDir::Forward, DimDir::Backward].iter() {
-                    let mut next_dir = prior.clone();
-                    next_dir.push(dir.clone());
-                    next_directions.push(next_dir);
-                }
-            }
-            next_directions
-        }
+        _ => non_negative_line_directions(dim - 1)
     }
 }
 

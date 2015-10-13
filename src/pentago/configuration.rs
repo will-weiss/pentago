@@ -16,8 +16,6 @@ const quadrant_length: usize = 2;
 
 #[derive(Debug, Clone)]
 pub struct Square {
-    pub ix: usize,
-
     pub b_pt: Point,
     pub q_pt: Point,
     pub s_pt: Point,
@@ -48,7 +46,7 @@ pub struct Configuration {
     pub quadrants: Lattice,
     pub single_quadrant: Lattice,
     pub squares: Squares,
-    pub square_indexes_by_quadrant: Vec<Vec<usize>>,
+    pub square_ix_by_quadrant: Vec<Vec<usize>>,
 }
 
 impl Configuration {
@@ -79,17 +77,13 @@ impl Configuration {
     fn add_squares(&mut self) {
         self.squares = Zip::new((
             self.whole_board.iter(),
-            Product::new(
-                self.quadrants.iter(),
-                self.single_quadrant.iter()
-            )
-        )).enumerate().map(|(ix, (b_pt, (q_pt, s_pt)))| {
+            Product::new(self.quadrants.iter(),self.single_quadrant.iter())
+        )).map(|(b_pt, (q_pt, s_pt))| {
 
-            let if_white = three_raised_to(ix);
+            let if_white = three_raised_to(b_pt.ix);
             let if_black = mult2(if_white.clone());
 
             Square {
-                ix: ix,
                 b_pt: b_pt.clone(),
                 q_pt: q_pt.clone(),
                 s_pt: s_pt.clone(),
@@ -99,16 +93,17 @@ impl Configuration {
         }).collect();
     }
 
-    fn add_square_indexes_by_quadrant(&mut self) {
-        let mut square_indexes_by_quadrant: Vec<Vec<usize>> = (0..self.quadrants.len()).map(|_| {
-            vec![0; self.single_quadrant.len()]
-        }).collect();
+    fn add_square_ix_by_quadrant(&mut self) {
+        let mut square_ix_by_quadrant: Vec<Vec<usize>> =
+            (0..self.quadrants.len()).map(|_| {
+                vec![0; self.single_quadrant.len()]
+            }).collect();
 
-        for square in (&self.squares) {
-            square_indexes_by_quadrant[square.q_pt.ix][square.s_pt.ix] = square.b_pt.ix
+        for sq in (&self.squares) {
+            square_ix_by_quadrant[sq.q_pt.ix][sq.s_pt.ix] = sq.b_pt.ix
         }
 
-        self.square_indexes_by_quadrant = square_indexes_by_quadrant;
+        self.square_ix_by_quadrant = square_ix_by_quadrant;
     }
 
     // Create a new Game of a given dimension, quadrant radius, and number of
@@ -126,7 +121,7 @@ impl Configuration {
             quadrants: vec![],
             single_quadrant: vec![],
             squares: vec![],
-            square_indexes_by_quadrant: vec![]
+            square_ix_by_quadrant: vec![]
         };
 
         configuration.add_rotation_planes();
@@ -134,7 +129,7 @@ impl Configuration {
         configuration.add_quadrants();
         configuration.add_single_quadrant();
         configuration.add_squares();
-        configuration.add_square_indexes_by_quadrant();
+        configuration.add_square_ix_by_quadrant();
 
         configuration
 

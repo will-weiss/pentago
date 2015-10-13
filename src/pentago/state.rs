@@ -41,27 +41,6 @@ impl State {
         }
     }
 
-    pub fn place(&self, place_q: usize, place_s: usize, color: Color) -> State {
-        State {
-            cfg: self.cfg.clone(),
-            black_to_move: !self.black_to_move,
-            result: None,
-            board: self.board.iter().enumerate().map(|(q_ix, quadrant)| {
-                if (place_q == q_ix) {
-                    Rc::new(quadrant.iter().enumerate().map(|(s_ix, square)| {
-                        if (place_s == s_ix) {
-                            Some(color)
-                        } else {
-                            square.clone()
-                        }
-                    }).collect())
-                } else {
-                    quadrant.clone()
-                }
-            }).collect()
-        }
-    }
-
     pub fn rotate_quadrant(&self, rotate_q: usize, direction: usize) -> State {
         State {
             cfg: self.cfg.clone(),
@@ -87,9 +66,30 @@ impl State {
             result: None,
             board: self.board.iter().enumerate().map(|(q_ix, quadrant)| {
                 Rc::new(quadrant.iter().enumerate().map(|(s_ix, square)| {
-                    let ix = self.cfg.square_indexes_by_quadrant[q_ix][s_ix];
+                    let ix = self.cfg.square_ix_by_quadrant[q_ix][s_ix];
                     quadrant[ix].clone()
                 }).collect())
+            }).collect()
+        }
+    }
+
+    pub fn place(&self, place_q: usize, place_s: usize, color: Color) -> State {
+        State {
+            cfg: self.cfg.clone(),
+            black_to_move: !self.black_to_move,
+            result: None,
+            board: self.board.iter().enumerate().map(|(q_ix, quadrant)| {
+                if (place_q == q_ix) {
+                    Rc::new(quadrant.iter().enumerate().map(|(s_ix, square)| {
+                        if (place_s == s_ix) {
+                            Some(color)
+                        } else {
+                            square.clone()
+                        }
+                    }).collect())
+                } else {
+                    quadrant.clone()
+                }
             }).collect()
         }
     }

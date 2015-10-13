@@ -20,12 +20,10 @@ pub struct Point {
 
 pub type Lattice = Vec<Point>;
 
-
 pub struct LatticeBuilder {
     dim: usize,
     length: usize,
 }
-
 
 impl LatticeBuilder {
 

@@ -13,7 +13,6 @@ pub type Coordinates = Vec<usize>;
 
 #[derive(Debug, Clone)]
 pub struct Point {
-    pub ix: usize,
     pub coordinates: Coordinates,
     pub rotations: Vec<usize>
 }
@@ -23,36 +22,37 @@ pub type Lattice = Vec<Point>;
 pub struct LatticeBuilder {
     dim: usize,
     length: usize,
+    all_coordinates: Vec<Coordinates>
 }
 
 impl LatticeBuilder {
 
-    pub fn build(cfg: &Configuration, length: usize) -> Lattice {
-        let builder = LatticeBuilder {
-            dim: cfg.dim,
+    pub fn build(rp: &RotationPlanes, dim: usize, length: usize) -> Lattice {
+        (LatticeBuilder {
+            dim: dim,
             length: length,
-        };
-
-        let all_coordinates = builder.get_all_coordinates();
-
-        all_coordinates.iter().enumerate().map(|(ix, coordinates)| {
-            Point {
-                ix: ix,
-                coordinates: coordinates.clone(),
-                rotations: builder.get_rotations(&cfg.rotation_planes, coordinates)
-            }
-        }).collect()
+            all_coordinates: LatticeBuilder::get_all_coordinates(dim, length)
+        }).to_lattice(rp)
     }
 
-    fn get_all_coordinates(&self) -> Vec<Coordinates> {
-        (0..self.dim).fold(vec![vec![]], |all_cs, _| {
-            Product::new(all_cs.iter(), (0..self.length)).map(|(coords, c)| {
+    pub fn get_all_coordinates(dim: usize, length: usize) -> Vec<Coordinates> {
+        (0..dim).fold(vec![vec![]], |all_cs, _| {
+            Product::new(all_cs.iter(), (0..length)).map(|(coords, c)| {
                 // There has to be a functional way to do this...
                 let mut cs = coords.clone();
                 cs.push(c);
                 cs
             }).collect()
         })
+    }
+
+    fn to_lattice(&self, rp: &RotationPlanes) -> Lattice {
+        self.all_coordinates.iter().enumerate().map(|(ix, coordinates)| {
+            Point {
+                coordinates: coordinates.clone(),
+                rotations: self.get_rotations(rp, coordinates)
+            }
+        }).collect()
     }
 
     fn apply_rotation(&self, coordinates: &Coordinates, rotation_plane: &RotationPlane) -> Coordinates {

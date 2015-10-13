@@ -16,16 +16,48 @@ const quadrant_length: usize = 2;
 
 #[derive(Debug, Clone)]
 pub struct Square {
-    pub b_pt: Point,
-    pub q_pt: Point,
-    pub s_pt: Point,
+    pub b_ix: usize,
+    pub q_ix: usize,
+    pub s_ix: usize,
 
     pub if_white: BigUint,
     pub if_black: BigUint,
 }
 
-
 pub type Squares = Vec<Square>;
+
+#[derive(Debug, Clone, Copy)]
+pub enum DimDir {
+    Null,
+    Forward,
+    Backward
+}
+
+pub type LineDir = Vec<DimDir>;
+
+fn init_line_direction(dim: usize) -> LineDir {
+    let mut ld = vec![DimDir::Null; dim - 1];
+    ld.push(DimDir::Forward);
+    ld
+}
+
+fn distinct_line_directions(dim: usize) -> Vec<LineDir> {
+    match dim {
+        0 => vec![],
+        _ => {
+            let prior_directions = distinct_line_directions(dim - 1);
+            let mut next_directions = vec![init_line_direction(dim)];
+            for prior in prior_directions.iter() {
+                for dir in [DimDir::Null, DimDir::Forward, DimDir::Backward].iter() {
+                    let mut next_dir = prior.clone();
+                    next_dir.push(dir.clone());
+                    next_directions.push(next_dir);
+                }
+            }
+            next_directions
+        }
+    }
+}
 
 pub type RotationPlane = [usize; 2];
 pub type RotationPlanes = Vec<RotationPlane>;
@@ -42,6 +74,7 @@ pub struct Configuration {
     pub diameter: usize,
     pub victory: usize,
     pub rotation_planes: RotationPlanes,
+    pub line_directions: Vec<LineDir>,
     pub whole_board: Lattice,
     pub quadrants: Lattice,
     pub single_quadrant: Lattice,
@@ -58,8 +91,12 @@ impl Configuration {
             .collect();
     }
 
+    fn add_line_directions(&mut self) {
+        self.line_directions = distinct_line_directions(self.dim);
+    }
+
     fn lattice(&self, length: usize) -> Lattice {
-        LatticeBuilder::build(self, length)
+        LatticeBuilder::build(&self.rotation_planes, self.dim, length)
     }
 
     fn add_whole_board(&mut self) {
@@ -76,17 +113,17 @@ impl Configuration {
 
     fn add_squares(&mut self) {
         self.squares = Zip::new((
-            self.whole_board.iter(),
-            Product::new(self.quadrants.iter(),self.single_quadrant.iter())
-        )).map(|(b_pt, (q_pt, s_pt))| {
+            0..self.whole_board.len(),
+            Product::new(0..self.quadrants.len(), 0..self.single_quadrant.len())
+        )).map(|(b_ix, (q_ix, s_ix))| {
 
-            let if_white = three_raised_to(b_pt.ix);
+            let if_white = three_raised_to(b_ix);
             let if_black = mult2(if_white.clone());
 
             Square {
-                b_pt: b_pt.clone(),
-                q_pt: q_pt.clone(),
-                s_pt: s_pt.clone(),
+                b_ix: b_ix,
+                q_ix: q_ix,
+                s_ix: s_ix,
                 if_white: if_white,
                 if_black: if_black
             }
@@ -100,7 +137,7 @@ impl Configuration {
             }).collect();
 
         for sq in (&self.squares) {
-            square_ix_by_quadrant[sq.q_pt.ix][sq.s_pt.ix] = sq.b_pt.ix
+            square_ix_by_quadrant[sq.q_ix][sq.s_ix] = sq.b_ix
         }
 
         self.square_ix_by_quadrant = square_ix_by_quadrant;
@@ -117,6 +154,7 @@ impl Configuration {
             diameter: radius * quadrant_length,
             victory: victory,
             rotation_planes: vec![],
+            line_directions: vec![],
             whole_board: vec![],
             quadrants: vec![],
             single_quadrant: vec![],
@@ -125,6 +163,7 @@ impl Configuration {
         };
 
         configuration.add_rotation_planes();
+        configuration.add_line_directions();
         configuration.add_whole_board();
         configuration.add_quadrants();
         configuration.add_single_quadrant();
@@ -154,7 +193,7 @@ impl Configuration {
     // Calculate the numeric representation of a given board.
     pub fn val(&self, board: &Board) -> BigUint {
         (self.squares).iter().fold(BigUint::zero(), |val, sq| {
-            let square = board[sq.q_pt.ix][sq.s_pt.ix];
+            let square = board[sq.q_ix][sq.s_ix];
             match square {
                 None => val,
                 Some(Color::White) => val + &sq.if_white,

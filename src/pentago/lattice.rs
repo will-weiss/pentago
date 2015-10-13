@@ -1,22 +1,20 @@
 extern crate itertools;
 use self::itertools::Product;
 use std::rc::Rc;
-use pentago::point::Point;
-
 
 
 #[derive(Debug, Clone)]
 pub struct Lattice {
     pub dim: usize,
     pub length: usize,
-    pub coordinates: Vec<Vec<usize>>,
-    pub rotations: Vec<Vec<usize>>
+    pub points: Vec<Vec<usize>>,
+    pub rotations: Vec<Vec<usize>>,
 }
 
 impl Lattice {
 
-    // The possible coordinates of a lattice with a given length and dimension.
-    fn get_coordinates(&self) -> Vec<Vec<usize>> {
+    // The possible points of a lattice with a given length and dimension.
+    fn get_points(&self) -> Vec<Vec<usize>> {
         (0..self.dim).fold(vec![vec![]], |all_coords, _| {
             Product::new(all_coords.iter(), (0..self.length)).map(|(coords, c)| {
                 // There has to be a functional way to do this...
@@ -37,8 +35,8 @@ impl Lattice {
     fn get_rotations(&self) -> Vec<Vec<usize>> {
         let rotation_planes = self.get_rotation_planes();
         (&rotation_planes).iter().map(|rotation_plane| {
-            (&self.coordinates).iter().map(|c| {
-                let rotated_cs = self.apply_rotation(&c, &rotation_plane);
+            (&self.points).iter().map(|coordinates| {
+                let rotated_cs = self.apply_rotation(&coordinates, &rotation_plane);
                 self.to_usize(&rotated_cs)
             }).collect()
         }).collect()
@@ -59,17 +57,17 @@ impl Lattice {
         })
     }
 
-    fn new(dim: usize, length: usize) -> Lattice {
+    pub fn new(dim: usize, length: usize) -> Lattice {
         let mut lattice = Lattice {
             dim: dim,
             length: length,
-            coordinates: vec![],
+            points: vec![],
             rotations: vec![]
         };
 
-        let coordinates = lattice.get_coordinates();
-        for c in coordinates {
-            lattice.coordinates.push(c);
+        let points = lattice.get_points();
+        for p in points {
+            lattice.points.push(p);
         }
 
         let rotations = lattice.get_rotations();
@@ -80,12 +78,12 @@ impl Lattice {
         lattice
     }
 
-    pub fn points(dim: usize, length: usize) -> Vec<Point> {
-        let lattice = Rc::new(Lattice::new(dim, length));
-        (0..lattice.coordinates.len()).map(|ix| {
-            Point::new(lattice.clone(), ix)
-        }).collect()
+    pub fn rotate(&self, ix: usize, direction: usize) -> usize {
+        self.rotations[direction][ix]
     }
 
+    pub fn len(&self) -> usize {
+        self.points.len()
+    }
 }
 

@@ -1,6 +1,6 @@
 extern crate num;
 
-use self::num::traits::{Zero, One, ToPrimitive};
+use self::num::traits::One;
 use self::num::bigint::BigUint;
 
 pub fn mult2(x: BigUint) -> BigUint {

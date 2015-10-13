@@ -1,14 +1,5 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum Color {
     Black,
     White
-}
-
-impl Color {
-    pub fn is_black(&self) -> bool {
-        match self {
-            &Color::Black => true,
-            _ => false
-        }
-    }
 }

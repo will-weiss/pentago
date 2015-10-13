@@ -85,5 +85,6 @@ impl Lattice {
     pub fn len(&self) -> usize {
         self.points.len()
     }
+
 }
 

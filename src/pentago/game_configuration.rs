@@ -55,6 +55,7 @@ impl GameConfiguration {
     pub fn new(dim: usize, length: usize, victory: usize) -> GameConfiguration {
         let squares = Lattice::new(dim, length);
         let quadrants = Lattice::new(dim, 2);
+        let whole = Lattice::new(dim, length * 2);
         let points = Point::gen(quadrants.len(), squares.len());
 
         GameConfiguration {

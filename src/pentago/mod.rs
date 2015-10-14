@@ -1,5 +1,9 @@
 pub mod color;
 pub mod lattice;
+pub mod rotation_plane;
+pub mod coordinates;
+pub mod square;
+pub mod direction;
 pub mod configuration;
 pub mod state;
 pub mod math_utils;

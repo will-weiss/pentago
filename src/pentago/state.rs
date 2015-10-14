@@ -4,19 +4,23 @@ use std::ops::BitXor;
 use std::iter::Enumerate;
 use std::slice::Iter;
 use std::rc::Rc;
-use pentago::configuration::Configuration;
+use pentago::configuration::{Configuration, Line};
 use self::num::bigint::BigUint;
 use self::num::traits::Zero;
 use pentago::board::*;
 use pentago::board::Color::{White, Black};
+pub use self::GameResult::*;
 
-pub type GameResult = Option<Color>;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GameResult {
+    Win(Color),
+    Draw
+}
 
 #[derive(Debug, Clone)]
 pub struct State {
     pub cfg: Rc<Configuration>,
     pub black_to_move: bool,
-    pub result: GameResult,
     pub board: Board
 }
 
@@ -26,8 +30,29 @@ impl State {
         State {
             cfg: cfg.clone(),
             black_to_move: true,
-            result: None,
             board: init_board(cfg.quadrants.len(), cfg.single_quadrant.len())
+        }
+    }
+
+    fn test_line(&self, line: &Line, color: Color) -> bool {
+        line.iter()
+            .map(|&(q_ix, s_ix)| self.board[q_ix][s_ix] )
+            .all(|space| space == Some(color))
+    }
+
+    fn test_color(&self, color: Color) -> bool {
+        self.cfg.all_lines.iter().any(|line| self.test_line(line, color))
+    }
+
+    fn get_result(&self) -> Option<GameResult> {
+        let black_has_line = self.test_color(Black);
+        let white_has_line = self.test_color(White);
+
+        match (black_has_line, white_has_line) {
+            (false, false) => None,
+            (true, false) => Some(Win(Black)),
+            (false, true) => Some(Win(White)),
+            (true, true) => Some(Draw),
         }
     }
 
@@ -35,7 +60,6 @@ impl State {
         State {
             cfg: self.cfg.clone(),
             black_to_move: take_turn.bitxor(self.black_to_move),
-            result: self.result,
             board: board
         }
     }
@@ -100,12 +124,6 @@ impl State {
         }).collect())
     }
 
-    // pub fn get_result(&self) -> GameResult {
-    //     for (q_ix, s_ix) in self.cfg.lines {
-    //         self.board[q_ix, ]
-    //     }
-    // }
-
     pub fn possible_placements(&self) -> Vec<State> {
         let color = self.to_move();
         let mut placement_states = vec![];
@@ -123,16 +141,3 @@ impl State {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

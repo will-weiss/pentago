@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Color {
     Black,
     White

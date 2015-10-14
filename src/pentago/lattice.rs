@@ -1,7 +1,6 @@
 use pentago::coordinates::{Coordinates, get_all_coordinates, coordinates_to_ix};
 use pentago::rotation::{RotationDir, RotationDirs};
 
-
 #[derive(Debug, Clone)]
 pub struct Point {
     pub coordinates: Coordinates,

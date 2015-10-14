@@ -19,18 +19,18 @@ pub fn build_lattice(rp: &RotationPlanes, dim: usize, length: usize) -> Lattice 
     }).collect()
 }
 
-fn apply_rotation(length: usize, coordinates: &Coordinates, rotation_plane: &RotationPlane) -> Coordinates {
-    let d_i = rotation_plane[0];
-    let d_j = rotation_plane[1];
+fn apply_rotation(length: usize, coordinates: &Coordinates, rp: &RotationPlane) -> Coordinates {
+    let d_i = rp[0];
+    let d_j = rp[1];
     let mut rotated_coordinates = coordinates.clone();
     rotated_coordinates[d_i] = length - 1 - coordinates[d_j];
     rotated_coordinates[d_j] = coordinates[d_i];
     rotated_coordinates
 }
 
-fn get_rotations(length: usize, rotation_planes: &RotationPlanes, coordinates: &Coordinates) -> Vec<usize> {
-    (rotation_planes).iter().map(|rotation_plane| {
-        let rotated_coordinates = apply_rotation(length, coordinates, &rotation_plane);
+fn get_rotations(length: usize, rps: &RotationPlanes, coordinates: &Coordinates) -> Vec<usize> {
+    rps.iter().map(|rp| {
+        let rotated_coordinates = apply_rotation(length, coordinates, rp);
         coordinates_to_ix(rotated_coordinates, length)
     }).collect()
 }

@@ -8,7 +8,7 @@ use pentago::rotation_plane::{RotationPlanes, get_all_rotation_planes};
 use pentago::direction::{LineDir, get_all_line_directions};
 use pentago::square::{Square, Squares};
 use pentago::lattice::{build_lattice, Lattice};
-use pentago::coordinates::coordinates_to_ix;
+use pentago::coordinates::{Coordinates, coordinates_to_ix};
 use pentago::state::State;
 
 const QUADRANT_LENGTH: usize = 2;
@@ -64,9 +64,7 @@ impl Configuration {
 
     fn add_square_ix_by_quadrant(&mut self) {
         let mut square_ix_by_quadrant: Vec<Vec<usize>> =
-            (0..self.quadrants.len()).map(|_| {
-                vec![0; self.single_quadrant.len()]
-            }).collect();
+            vec![vec![0; self.single_quadrant.len()]; self.quadrants.len()];
 
         for sq in (&self.squares) {
             square_ix_by_quadrant[sq.q_ix][sq.s_ix] = sq.b_ix
@@ -75,11 +73,24 @@ impl Configuration {
         self.square_ix_by_quadrant = square_ix_by_quadrant;
     }
 
+    fn coordinates_out_of_bounds(&self, cs: &Vec<i32>) -> bool {
+        !cs.iter().all(|&coordinate|
+            coordinate >= 0 && coordinate < (self.diameter as i32)
+        )
+    }
+
+    fn maybe_adj_coordinates(&self, sq: &Square, ld: &LineDir) -> Option<Coordinates> {
+        let adj_cs: Vec<i32> = self.whole_board[sq.b_ix].coordinates.iter()
+            .zip(ld).map(|(coordinate, dim_dir)| {
+                (coordinate.clone() as i32) + dim_dir.as_i32()
+            }).collect();
+        if self.coordinates_out_of_bounds(&adj_cs) { None }
+        else { Some(adj_cs.iter().map(|c| *c as usize).collect()) }
+    }
+
     fn add_square_adjacencies(&mut self) {
         let mut square_adjacencies: Vec<Vec<Option<usize>>> =
-            (0..self.whole_board.len()).map(|_| {
-                vec![None; self.line_directions.len()]
-            }).collect();
+            vec![vec![None; self.line_directions.len()]; self.whole_board.len()];
 
         let square_iter = Product::new(
             self.squares.iter(),
@@ -87,23 +98,11 @@ impl Configuration {
         );
 
         for (sq, (ld_ix, ld)) in square_iter {
-            let maybe_coordinates: Vec<i32> =
-                self.whole_board[sq.b_ix].coordinates.iter().zip(ld)
-                    .map(|(coordinate, dim_dir)| {
-                        (coordinate.clone() as i32) + dim_dir.as_i32()
-                    }).collect();
-
-            let in_bounds = maybe_coordinates.iter().all(|&coordinate| {
-                coordinate >= 0 && coordinate < (self.diameter as i32)
-            });
-
-            if in_bounds {
-                let coordinates = maybe_coordinates.iter()
-                    .map(|c| *c as usize).collect();
-                let adj_ix = coordinates_to_ix(coordinates, self.diameter);
+            let maybe_adj_cs = self.maybe_adj_coordinates(sq, ld);
+            if let Some(adj_cs) = maybe_adj_cs {
+                let adj_ix = coordinates_to_ix(adj_cs, self.diameter);
                 square_adjacencies[sq.b_ix][ld_ix] = Some(adj_ix);
             }
-
         }
 
         self.square_adjacencies = square_adjacencies;

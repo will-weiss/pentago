@@ -4,20 +4,16 @@ use std::rc::Rc;
 use pentago::configuration::Configuration;
 use self::num::bigint::BigUint;
 use self::num::traits::Zero;
-use pentago::board::{Color, Board, init_board};
+use pentago::board::*;
+use pentago::board::Color::{White, Black};
 
-#[derive(Debug, Clone)]
-pub enum GameResult {
-    BlackWin,
-    WhiteWin
-}
-
+pub type GameResult = Option<Color>;
 
 #[derive(Debug, Clone)]
 pub struct State {
     pub cfg: Rc<Configuration>,
     pub black_to_move: bool,
-    pub result: Option<GameResult>,
+    pub result: GameResult,
     pub board: Board
 }
 
@@ -35,20 +31,17 @@ impl State {
 
     pub fn val(&self) -> BigUint {
         (self.cfg.squares).iter().fold(BigUint::zero(), |val, sq| {
-            let square = self.board[sq.q_ix][sq.s_ix];
-            match square {
+            let space = self.board[sq.q_ix][sq.s_ix];
+            match space {
                 None => val,
-                Some(Color::White) => val + &sq.if_white,
-                Some(Color::Black) => val + &sq.if_black
+                Some(White) => val + &sq.if_white,
+                Some(Black) => val + &sq.if_black
             }
         })
     }
 
     pub fn to_move(&self) -> Color {
-        match self.black_to_move {
-            true => Color::Black,
-            false => Color::White
-        }
+        if (self.black_to_move) { Black } else { White }
     }
 
     pub fn rotate_quadrant(&self, rotate_q: usize, direction: usize) -> State {
@@ -57,14 +50,13 @@ impl State {
             black_to_move: self.black_to_move,
             result: None,
             board: self.board.iter().enumerate().map(|(q_ix, quadrant)| {
-                if rotate_q == q_ix {
+                if rotate_q != q_ix { quadrant.clone() }
+                else {
                     Rc::new((0..quadrant.len()).map(|s_ix| {
                         let this_pt = &self.cfg.single_quadrant[s_ix];
                         let rotate_ix = this_pt.rotations[direction];
                         quadrant[rotate_ix].clone()
                     }).collect())
-                } else {
-                    quadrant.clone()
                 }
             }).collect()
         }
@@ -87,20 +79,21 @@ impl State {
         }
     }
 
+    fn place_in_quadrant(&self, quadrant: &QuadrantRef, place_s: usize, color: Color) -> QuadrantRef {
+        Rc::new(quadrant.iter().enumerate().map(|(s_ix, space)| {
+            if place_s == s_ix { Some(color) }
+            else { space.clone() }
+        }).collect())
+    }
+
     pub fn place(&self, place_q: usize, place_s: usize, color: Color) -> State {
         State {
             cfg: self.cfg.clone(),
             black_to_move: !self.black_to_move,
             result: None,
             board: self.board.iter().enumerate().map(|(q_ix, quadrant)| {
-                if place_q == q_ix {
-                    Rc::new(quadrant.iter().enumerate().map(|(s_ix, square)| {
-                        if place_s == s_ix { Some(color) }
-                        else { square.clone() }
-                    }).collect())
-                } else {
-                    quadrant.clone()
-                }
+                if place_q != q_ix { quadrant.clone() }
+                else { self.place_in_quadrant(quadrant, place_s, color) }
             }).collect()
         }
     }

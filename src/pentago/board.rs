@@ -6,14 +6,17 @@ pub enum Color {
     White
 }
 
-pub type Quadrant = Vec<Option<Color>>;
-pub type Board = Vec<Rc<Quadrant>>;
+pub type Space = Option<Color>;
+
+pub type Quadrant = Vec<Space>;
+pub type QuadrantRef = Rc<Quadrant>;
+pub type Board = Vec<QuadrantRef>;
 
 
 fn init_quadrant(sq_len: usize) -> Quadrant {
-    (0..sq_len).map(|_| None).collect()
+    vec![None; sq_len]
 }
 
 pub fn init_board(qs_len: usize, sq_len: usize) -> Board {
-    (0..qs_len).map(|_| Rc::new(init_quadrant(sq_len))).collect()
+    vec![Rc::new(init_quadrant(sq_len)); qs_len]
 }

@@ -13,6 +13,10 @@ use pentago::state::State;
 
 const QUADRANT_LENGTH: usize = 2;
 
+pub type SquareIx = (usize, usize);
+pub type Line = Vec<SquareIx>;
+pub type Adjacency = Option<usize>;
+
 
 #[derive(Debug, Clone)]
 pub struct Configuration {
@@ -28,55 +32,29 @@ pub struct Configuration {
     pub quadrants: Lattice,
     pub single_quadrant: Lattice,
     pub squares: Squares,
+    pub square_ixs: Vec<SquareIx>,
     pub square_ix_by_quadrant: Vec<Vec<usize>>,
-    pub square_adjacencies: Vec<Vec<Option<usize>>>,
-    pub lines: Vec<Vec<usize>>,
+    pub lines_by_ix: Vec<Vec<Line>>,
+    pub all_lines: Vec<Line>,
 }
 
 impl Configuration {
+
+
+    fn add_rotations_dirs(&mut self) {
+        self.rotation_planes = get_all_rotation_planes(self.dim);
+        self.rotation_dirs = get_all_rotation_dirs(&self.rotation_planes);
+        self.line_directions = get_all_line_directions(self.dim);
+    }
 
     fn lattice(&self, length: usize) -> Lattice {
         build_lattice(&self.rotation_dirs, self.dim, length)
     }
 
-    fn add_rotation_planes(&mut self) {
-        self.rotation_planes = get_all_rotation_planes(self.dim);
-    }
-
-    fn add_rotation_dirs(&mut self) {
-        self.rotation_dirs = get_all_rotation_dirs(&self.rotation_planes);
-    }
-
-    fn add_line_directions(&mut self) {
-        self.line_directions = get_all_line_directions(self.dim);
-    }
-
-    fn add_whole_board(&mut self) {
+    fn add_lattices(&mut self) {
         self.whole_board = self.lattice(self.diameter);
-    }
-
-    fn add_quadrants(&mut self) {
         self.quadrants = self.lattice(self.quadrant_length);
-    }
-
-    fn add_single_quadrant(&mut self) {
         self.single_quadrant = self.lattice(self.radius);
-    }
-
-    fn add_squares(&mut self) {
-        let squares = Square::all(self);
-        self.squares = squares;
-    }
-
-    fn add_square_ix_by_quadrant(&mut self) {
-        let mut square_ix_by_quadrant: Vec<Vec<usize>> =
-            vec![vec![0; self.single_quadrant.len()]; self.quadrants.len()];
-
-        for sq in (&self.squares) {
-            square_ix_by_quadrant[sq.q_ix][sq.s_ix] = sq.b_ix
-        }
-
-        self.square_ix_by_quadrant = square_ix_by_quadrant;
     }
 
     fn coordinates_out_of_bounds(&self, cs: &Vec<i32>) -> bool {
@@ -94,16 +72,28 @@ impl Configuration {
         else { Some(adj_cs.iter().map(|c| *c as usize).collect()) }
     }
 
-    fn add_square_adjacencies(&mut self) {
-        let mut square_adjacencies: Vec<Vec<Option<usize>>> =
-            vec![vec![None; self.line_directions.len()]; self.whole_board.len()];
+    fn add_square_fields(&mut self) {
+        let squares = Square::all(self);
+        self.squares = squares;
 
-        let square_iter = Product::new(
+        self.square_ix_by_quadrant =
+            vec![vec![0; self.single_quadrant.len()]; self.quadrants.len()];
+
+        for sq in (&self.squares) {
+            self.square_ix_by_quadrant[sq.q_ix][sq.s_ix] = sq.b_ix;
+            self.square_ixs.push((sq.q_ix, sq.s_ix));
+        }
+    }
+
+    fn get_square_adjacencies(&self) -> Vec<Vec<Adjacency>> {
+
+        let mut square_adjacencies =
+            vec![vec![None; self.whole_board.len()]; self.line_directions.len()];
+
+        for (sq, (ld_ix, ld)) in Product::new(
             self.squares.iter(),
             self.line_directions.iter().enumerate()
-        );
-
-        for (sq, (ld_ix, ld)) in square_iter {
+        ) {
             let maybe_adj_cs = self.maybe_adj_coordinates(sq, ld);
             if let Some(adj_cs) = maybe_adj_cs {
                 let adj_ix = coordinates_to_ix(adj_cs, self.diameter);
@@ -111,30 +101,45 @@ impl Configuration {
             }
         }
 
-        self.square_adjacencies = square_adjacencies;
+        square_adjacencies
+
+    }
+
+    fn add_lines_from_adjacencies(&mut self, adjs: &Vec<Adjacency>, ix: usize) -> &mut Self {
+        let mut line_ixs: Vec<usize> = vec![];
+        let mut ref_ix = ix;
+        for _ in 1..self.victory {
+            match adjs[ref_ix] {
+                None => { return self },
+                Some(next_ix) => {
+                    line_ixs.push(next_ix);
+                    ref_ix = next_ix;
+                }
+            }
+        }
+
+        line_ixs.push(ref_ix);
+        let line = self.to_line(&line_ixs);
+
+        self.all_lines.push(line.clone());
+
+        for ix in line_ixs {
+            self.lines_by_ix[ix].push(line.clone());
+        }
+
+        self
+    }
+
+    fn to_line(&self, line_ixs: &Vec<usize>) -> Line {
+        line_ixs.iter().map(|&ix| self.square_ixs[ix].clone()).collect()
     }
 
     fn add_lines(&mut self) {
-        return;
-        for adjs in self.square_adjacencies.iter() {
-            for (ix, adj) in adjs.iter().enumerate() {
-                let mut potential_line = vec![];
-                let mut ref_ix = ix;
-                let mut ref_adj = adj;
-                for _ in 0..self.victory {
-                    match *ref_adj {
-                        None => { break },
-                        Some(next_ix) => {
-                            potential_line.push(ref_ix);
-                            ref_adj = &adjs[next_ix];
-                            ref_ix = next_ix;
-                        }
-                    }
-                }
+        self.lines_by_ix = vec![vec![]; self.squares.len()];
 
-                if potential_line.len() == self.victory {
-                    self.lines.push(potential_line);
-                }
+        for adjs in self.get_square_adjacencies().iter() {
+            for ix in 0..adjs.len() {
+                self.add_lines_from_adjacencies(adjs, ix);
             }
         }
     }
@@ -156,20 +161,15 @@ impl Configuration {
             quadrants: vec![],
             single_quadrant: vec![],
             squares: vec![],
+            square_ixs: vec![],
             square_ix_by_quadrant: vec![],
-            square_adjacencies: vec![],
-            lines: vec![],
+            lines_by_ix: vec![],
+            all_lines: vec![],
         };
 
-        configuration.add_rotation_planes();
-        configuration.add_rotation_dirs();
-        configuration.add_line_directions();
-        configuration.add_whole_board();
-        configuration.add_quadrants();
-        configuration.add_single_quadrant();
-        configuration.add_squares();
-        configuration.add_square_ix_by_quadrant();
-        configuration.add_square_adjacencies();
+        configuration.add_rotations_dirs();
+        configuration.add_lattices();
+        configuration.add_square_fields();
         configuration.add_lines();
 
         configuration

@@ -14,39 +14,44 @@ fn val_of(gs: &State) {
 fn main() {
     let gc = Configuration::new(2, 3, 5);
 
-    println!("{:?}", gc);
+    for lines in gc.lines_by_ix {
+        println!("LINES\n");
+        for l in lines {
+            println!("{:?}", l);
+        }
+    }
 
-    let s0 = gc.init_state();
-    val_of(&s0);
+    // let s0 = gc.init_state();
+    // val_of(&s0);
 
 
-    let s1 = s0.place(0, 0, White);
+    // let s1 = s0.place(0, 0, White);
 
-    let s1 = s0.place(0, 2, Black);
-    val_of(&s1);
+    // let s1 = s0.place(0, 2, Black);
+    // val_of(&s1);
 
 
-    let mut s = s1.rotate_single_quadrant(0, 1);
+    // let mut s = s1.rotate_single_quadrant(0, 1);
 
-    val_of(&s);
+    // val_of(&s);
 
-    s = s.rotate_single_quadrant(0, 1);
-    val_of(&s);
+    // s = s.rotate_single_quadrant(0, 1);
+    // val_of(&s);
 
-    s = s.rotate_single_quadrant(0, 1);
-    val_of(&s);
+    // s = s.rotate_single_quadrant(0, 1);
+    // val_of(&s);
 
-    s = s.rotate_board(1);
-    val_of(&s);
+    // s = s.rotate_board(1);
+    // val_of(&s);
 
-    s = s.rotate_board(1);
-    val_of(&s);
+    // s = s.rotate_board(1);
+    // val_of(&s);
 
-    s = s.rotate_board(1);
-    val_of(&s);
+    // s = s.rotate_board(1);
+    // val_of(&s);
 
-    s = s.rotate_board(1);
-    val_of(&s);
+    // s = s.rotate_board(1);
+    // val_of(&s);
 
 
 

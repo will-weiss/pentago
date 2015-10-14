@@ -100,6 +100,12 @@ impl State {
         }).collect())
     }
 
+    // pub fn get_result(&self) -> GameResult {
+    //     for (q_ix, s_ix) in self.cfg.lines {
+    //         self.board[q_ix, ]
+    //     }
+    // }
+
     pub fn possible_placements(&self) -> Vec<State> {
         let color = self.to_move();
         let mut placement_states = vec![];
@@ -117,3 +123,16 @@ impl State {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

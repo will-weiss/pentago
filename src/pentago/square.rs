@@ -22,10 +22,10 @@ pub type Squares = Vec<Square>;
 impl Square {
 
     pub fn all(cfg: &Configuration) -> Squares {
-        (0..cfg.whole_board.len()).zip(Product::new(
-            0..cfg.quadrants.len(),
-            0..cfg.single_quadrant.len()
-        )).map(|(b_ix, (q_ix, s_ix))| {
+        (cfg.whole_board.iter().enumerate()).zip(Product::new(
+            cfg.quadrants.iter().enumerate(),
+            cfg.single_quadrant.iter().enumerate()
+        )).map(|((b_ix, b_pt), ((q_ix, q_pt), (s_ix, s_pt)))| {
 
             let if_white = three_raised_to(b_ix);
             let if_black = mult2(if_white.clone());

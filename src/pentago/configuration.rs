@@ -6,14 +6,14 @@ use self::num::traits::{Zero, One};
 use self::num::bigint::BigUint;
 use self::itertools::{Product, Zip};
 
+use pentago::color::Color;
 use pentago::state::State;
+use pentago::coordinates::{Coordinates, coordinates_to_ix};
 use pentago::rotation_plane::{RotationPlanes, RotationPlane, get_all_rotation_planes};
 use pentago::direction::{DimDir, LineDir, get_all_line_directions};
 use pentago::square::{Square, Squares};
-use pentago::lattice::{LatticeBuilder, Point, Lattice};
+use pentago::lattice::{build_lattice, Point, Lattice};
 use pentago::math_utils::{three_raised_to, mult2, mult3};
-use pentago::color::Color;
-use pentago::coordinates::Coordinates;
 
 const quadrant_length: usize = 2;
 
@@ -49,7 +49,7 @@ impl Configuration {
     }
 
     fn lattice(&self, length: usize) -> Lattice {
-        LatticeBuilder::build(&self.rotation_planes, self.dim, length)
+        build_lattice(&self.rotation_planes, self.dim, length)
     }
 
     fn add_whole_board(&mut self) {
@@ -88,26 +88,29 @@ impl Configuration {
                 vec![None; self.line_directions.len()]
             }).collect();
 
-        for (sq, (ld_ix, ld)) in Product::new(
+        let square_iter = Product::new(
             self.squares.iter(),
             self.line_directions.iter().enumerate()
-        ) {
-            let maybe_coordinates: Vec<i32> = self.whole_board[sq.b_ix].coordinates
-                .iter()
-                .zip(ld)
-                .map(|(coordinate, dim_dir)| {
-                    (coordinate.clone() as i32) + match *dim_dir {
-                        DimDir::Null => 0,
-                        DimDir::Forward => 1,
-                        DimDir::Backward => -1
-                    }
-                }).collect();
+        );
 
-            if maybe_coordinates.iter().all(|&coordinate| {
+        for (sq, (ld_ix, ld)) in square_iter {
+            let maybe_coordinates: Vec<i32> =
+                self.whole_board[sq.b_ix].coordinates.iter().zip(ld)
+                    .map(|(coordinate, dim_dir)| {
+                        (coordinate.clone() as i32) + dim_dir.as_i32()
+                    }).collect();
+
+            let in_bounds = maybe_coordinates.iter().all(|&coordinate| {
                 coordinate >= 0 && coordinate < (self.diameter as i32)
-            }) {
-                 println!("{:?}", &maybe_coordinates);
+            });
+
+            if in_bounds {
+                let coordinates = maybe_coordinates.iter()
+                    .map(|c| *c as usize).collect();
+                let adj_ix = coordinates_to_ix(coordinates, self.diameter);
+                square_adjacencies[sq.b_ix][ld_ix] = Some(adj_ix);
             }
+
         }
 
         self.square_adjacencies = square_adjacencies;
@@ -147,31 +150,19 @@ impl Configuration {
     }
 
     pub fn init_quadrant(&self) -> Quadrant {
-        (0..self.single_quadrant.len()).map(|_| {
-            None
-        }).collect()
+        (0..self.single_quadrant.len())
+            .map(|_| None)
+            .collect()
     }
 
     pub fn init_board(&self) -> Board {
-        (0..self.quadrants.len()).map(|_| {
-            Rc::new(self.init_quadrant())
-        }).collect()
+        (0..self.quadrants.len())
+            .map(|_| Rc::new(self.init_quadrant()))
+            .collect()
     }
 
     pub fn init_state(self) -> State {
         State::new(Rc::new(self))
-    }
-
-    // Calculate the numeric representation of a given board.
-    pub fn val(&self, board: &Board) -> BigUint {
-        (self.squares).iter().fold(BigUint::zero(), |val, sq| {
-            let square = board[sq.q_ix][sq.s_ix];
-            match square {
-                None => val,
-                Some(Color::White) => val + &sq.if_white,
-                Some(Color::Black) => val + &sq.if_black
-            }
-        })
     }
 
 }

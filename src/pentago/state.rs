@@ -4,12 +4,14 @@ use std::rc::Rc;
 use pentago::color::Color;
 use pentago::configuration::{Configuration, Board, Quadrant};
 use self::num::bigint::BigUint;
+use self::num::traits::{Zero, One};
 
 #[derive(Debug, Clone)]
 pub enum GameResult {
     BlackWin,
     WhiteWin
 }
+
 
 #[derive(Debug, Clone)]
 pub struct State {
@@ -18,6 +20,7 @@ pub struct State {
     pub result: Option<GameResult>,
     pub board: Board
 }
+
 
 impl State {
 
@@ -31,7 +34,14 @@ impl State {
     }
 
     pub fn val(&self) -> BigUint {
-        self.cfg.val(&self.board)
+        (self.cfg.squares).iter().fold(BigUint::zero(), |val, sq| {
+            let square = self.board[sq.q_ix][sq.s_ix];
+            match square {
+                None => val,
+                Some(Color::White) => val + &sq.if_white,
+                Some(Color::Black) => val + &sq.if_black
+            }
+        })
     }
 
     pub fn to_move(&self) -> Color {

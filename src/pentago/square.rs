@@ -23,6 +23,7 @@ pub struct Square {
 pub type Squares = Vec<Square>;
 
 impl Square {
+
     pub fn all(cfg: &Configuration) -> Squares {
         (0..cfg.whole_board.len()).zip(Product::new(
             0..cfg.quadrants.len(),
@@ -41,6 +42,5 @@ impl Square {
             }
         }).collect()
     }
+
 }
-
-

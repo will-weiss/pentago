@@ -1,23 +1,20 @@
-extern crate num;
-extern crate itertools;
-
-use std::rc::Rc;
-use self::num::traits::{Zero, One};
-use self::num::bigint::BigUint;
-use self::itertools::{Product, Zip};
-
-use pentago::state::State;
-use pentago::coordinates::Coordinates;
-use pentago::lattice::{LatticeBuilder, Point, Lattice};
-use pentago::math_utils::{three_raised_to, mult2, mult3};
-use pentago::color::Color;
-
-
 #[derive(Debug, Clone, Copy)]
 pub enum DimDir {
     Null,
     Forward,
     Backward
+}
+
+impl DimDir {
+
+    pub fn as_i32(&self) -> i32 {
+        match *self {
+            DimDir::Null => 0,
+            DimDir::Forward => 1,
+            DimDir::Backward => -1
+        }
+    }
+
 }
 
 pub type LineDir = Vec<DimDir>;

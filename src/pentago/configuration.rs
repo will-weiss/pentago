@@ -30,6 +30,7 @@ pub struct Configuration {
     pub squares: Squares,
     pub square_ix_by_quadrant: Vec<Vec<usize>>,
     pub square_adjacencies: Vec<Vec<Option<usize>>>,
+    pub lines: Vec<Vec<usize>>,
 }
 
 impl Configuration {
@@ -106,11 +107,36 @@ impl Configuration {
             let maybe_adj_cs = self.maybe_adj_coordinates(sq, ld);
             if let Some(adj_cs) = maybe_adj_cs {
                 let adj_ix = coordinates_to_ix(adj_cs, self.diameter);
-                square_adjacencies[sq.b_ix][ld_ix] = Some(adj_ix);
+                square_adjacencies[ld_ix][sq.b_ix] = Some(adj_ix);
             }
         }
 
         self.square_adjacencies = square_adjacencies;
+    }
+
+    fn add_lines(&mut self) {
+        return;
+        for adjs in self.square_adjacencies.iter() {
+            for (ix, adj) in adjs.iter().enumerate() {
+                let mut potential_line = vec![];
+                let mut ref_ix = ix;
+                let mut ref_adj = adj;
+                for _ in 0..self.victory {
+                    match *ref_adj {
+                        None => { break },
+                        Some(next_ix) => {
+                            potential_line.push(ref_ix);
+                            ref_adj = &adjs[next_ix];
+                            ref_ix = next_ix;
+                        }
+                    }
+                }
+
+                if potential_line.len() == self.victory {
+                    self.lines.push(potential_line);
+                }
+            }
+        }
     }
 
     // Create a new Game of a given dimension, quadrant radius, and number of
@@ -132,6 +158,7 @@ impl Configuration {
             squares: vec![],
             square_ix_by_quadrant: vec![],
             square_adjacencies: vec![],
+            lines: vec![],
         };
 
         configuration.add_rotation_planes();
@@ -143,6 +170,7 @@ impl Configuration {
         configuration.add_squares();
         configuration.add_square_ix_by_quadrant();
         configuration.add_square_adjacencies();
+        configuration.add_lines();
 
         configuration
 

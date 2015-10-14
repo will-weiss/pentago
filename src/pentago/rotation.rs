@@ -24,6 +24,5 @@ pub fn get_all_rotation_dirs(rotation_planes: &RotationPlanes) -> RotationDirs {
         rotation_dirs.push(rotation_plane.clone());
         rotation_dirs.push([rotation_plane[1], rotation_plane[0]]);
     }
-    println!("{:?}", rotation_dirs);
     rotation_dirs
 }

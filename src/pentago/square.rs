@@ -1,12 +1,10 @@
 extern crate num;
 extern crate itertools;
 
-use std::rc::Rc;
-use self::num::traits::{Zero, One};
 use self::num::bigint::BigUint;
-use self::itertools::{Product, Zip};
+use self::itertools::Product;
 
-use pentago::math_utils::{three_raised_to, mult2, mult3};
+use pentago::math_utils::{three_raised_to, mult2};
 use pentago::configuration::Configuration;
 
 

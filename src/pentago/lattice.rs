@@ -1,8 +1,5 @@
 use pentago::coordinates::{Coordinates, get_all_coordinates, coordinates_to_ix};
 use pentago::rotation_plane::{RotationPlane, RotationPlanes};
-use pentago::configuration::Configuration;
-use pentago::math_utils::{three_raised_to, mult2, mult3};
-use pentago::color::Color::{Black, White};
 
 
 #[derive(Debug, Clone)]
@@ -14,7 +11,7 @@ pub struct Point {
 pub type Lattice = Vec<Point>;
 
 pub fn build_lattice(rp: &RotationPlanes, dim: usize, length: usize) -> Lattice {
-    get_all_coordinates(dim, length).iter().enumerate().map(|(ix, coordinates)| {
+    get_all_coordinates(dim, length).iter().map(|coordinates| {
         Point {
             coordinates: coordinates.clone(),
             rotations: get_rotations(length, rp, coordinates)

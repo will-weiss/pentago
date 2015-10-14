@@ -1,4 +1,4 @@
-pub mod color;
+pub mod board;
 pub mod lattice;
 pub mod rotation_plane;
 pub mod coordinates;

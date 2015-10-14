@@ -19,8 +19,8 @@ pub fn three_raised_to(x: usize) -> BigUint {
     })
 }
 
-pub fn factorial(num: usize) -> usize {
-    (0..num).fold(1, |fact, n| {
-        fact * n
-    })
-}
+// pub fn factorial(num: usize) -> usize {
+//     (0..num).fold(1, |fact, n| {
+//         fact * n
+//     })
+// }

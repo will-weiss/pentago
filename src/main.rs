@@ -4,7 +4,7 @@ extern crate num;
 use self::num::traits::ToPrimitive;
 use pentago::state::State;
 use pentago::configuration::Configuration;
-use pentago::color::Color::{Black, White};
+use pentago::board::Color::{Black, White};
 
 
 fn val_of(gs: &State) {
@@ -21,6 +21,8 @@ fn main() {
 
 
     let s1 = s0.place(0, 0, White);
+
+    let s1 = s0.place(0, 2, Black);
     val_of(&s1);
 
 
@@ -34,7 +36,16 @@ fn main() {
     s = s.rotate_quadrant(0, 1);
     val_of(&s);
 
-    s = s.rotate_quadrant(0, 1);
+    s = s.rotate_board(1);
+    val_of(&s);
+
+    s = s.rotate_board(1);
+    val_of(&s);
+
+    s = s.rotate_board(1);
+    val_of(&s);
+
+    s = s.rotate_board(1);
     val_of(&s);
 
 

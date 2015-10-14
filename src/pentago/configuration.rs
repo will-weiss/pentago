@@ -2,23 +2,16 @@ extern crate num;
 extern crate itertools;
 
 use std::rc::Rc;
-use self::num::traits::{Zero, One};
-use self::num::bigint::BigUint;
-use self::itertools::{Product, Zip};
+use self::itertools::Product;
 
-use pentago::color::Color;
-use pentago::state::State;
-use pentago::coordinates::{Coordinates, coordinates_to_ix};
-use pentago::rotation_plane::{RotationPlanes, RotationPlane, get_all_rotation_planes};
-use pentago::direction::{DimDir, LineDir, get_all_line_directions};
+use pentago::rotation_plane::{RotationPlanes, get_all_rotation_planes};
+use pentago::direction::{LineDir, get_all_line_directions};
 use pentago::square::{Square, Squares};
-use pentago::lattice::{build_lattice, Point, Lattice};
-use pentago::math_utils::{three_raised_to, mult2, mult3};
+use pentago::lattice::{build_lattice, Lattice};
+use pentago::coordinates::coordinates_to_ix;
+use pentago::state::State;
 
-const quadrant_length: usize = 2;
-
-pub type Quadrant = Vec<Option<Color>>;
-pub type Board = Vec<Rc<Quadrant>>;
+const QUADRANT_LENGTH: usize = 2;
 
 
 #[derive(Debug, Clone)]
@@ -40,16 +33,16 @@ pub struct Configuration {
 
 impl Configuration {
 
+    fn lattice(&self, length: usize) -> Lattice {
+        build_lattice(&self.rotation_planes, self.dim, length)
+    }
+
     fn add_rotation_planes(&mut self) {
         self.rotation_planes = get_all_rotation_planes(self.dim);
     }
 
     fn add_line_directions(&mut self) {
         self.line_directions = get_all_line_directions(self.dim);
-    }
-
-    fn lattice(&self, length: usize) -> Lattice {
-        build_lattice(&self.rotation_planes, self.dim, length)
     }
 
     fn add_whole_board(&mut self) {
@@ -123,8 +116,8 @@ impl Configuration {
         let mut configuration = Configuration {
             dim: dim,
             radius: radius,
-            quadrant_length: quadrant_length,
-            diameter: radius * quadrant_length,
+            quadrant_length: QUADRANT_LENGTH,
+            diameter: radius * QUADRANT_LENGTH,
             victory: victory,
             rotation_planes: vec![],
             line_directions: vec![],
@@ -147,18 +140,6 @@ impl Configuration {
 
         configuration
 
-    }
-
-    pub fn init_quadrant(&self) -> Quadrant {
-        (0..self.single_quadrant.len())
-            .map(|_| None)
-            .collect()
-    }
-
-    pub fn init_board(&self) -> Board {
-        (0..self.quadrants.len())
-            .map(|_| Rc::new(self.init_quadrant()))
-            .collect()
     }
 
     pub fn init_state(self) -> State {

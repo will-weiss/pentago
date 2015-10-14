@@ -26,14 +26,14 @@ fn main() {
     val_of(&s1);
 
 
-    let mut s = s1.rotate_quadrant(0, 1);
+    let mut s = s1.rotate_single_quadrant(0, 1);
 
     val_of(&s);
 
-    s = s.rotate_quadrant(0, 1);
+    s = s.rotate_single_quadrant(0, 1);
     val_of(&s);
 
-    s = s.rotate_quadrant(0, 1);
+    s = s.rotate_single_quadrant(0, 1);
     val_of(&s);
 
     s = s.rotate_board(1);

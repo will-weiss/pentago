@@ -4,7 +4,7 @@ extern crate itertools;
 use std::rc::Rc;
 use self::itertools::Product;
 
-use pentago::rotation_plane::{RotationPlanes, get_all_rotation_planes};
+use pentago::rotation::{RotationPlanes, RotationDirs, get_all_rotation_planes, get_all_rotation_dirs};
 use pentago::direction::{LineDir, get_all_line_directions};
 use pentago::square::{Square, Squares};
 use pentago::lattice::{build_lattice, Lattice};
@@ -22,6 +22,7 @@ pub struct Configuration {
     pub diameter: usize,
     pub victory: usize,
     pub rotation_planes: RotationPlanes,
+    pub rotation_dirs: RotationDirs,
     pub line_directions: Vec<LineDir>,
     pub whole_board: Lattice,
     pub quadrants: Lattice,
@@ -34,11 +35,15 @@ pub struct Configuration {
 impl Configuration {
 
     fn lattice(&self, length: usize) -> Lattice {
-        build_lattice(&self.rotation_planes, self.dim, length)
+        build_lattice(&self.rotation_dirs, self.dim, length)
     }
 
     fn add_rotation_planes(&mut self) {
         self.rotation_planes = get_all_rotation_planes(self.dim);
+    }
+
+    fn add_rotation_dirs(&mut self) {
+        self.rotation_dirs = get_all_rotation_dirs(&self.rotation_planes);
     }
 
     fn add_line_directions(&mut self) {
@@ -119,6 +124,7 @@ impl Configuration {
             diameter: radius * QUADRANT_LENGTH,
             victory: victory,
             rotation_planes: vec![],
+            rotation_dirs: vec![],
             line_directions: vec![],
             whole_board: vec![],
             quadrants: vec![],
@@ -129,6 +135,7 @@ impl Configuration {
         };
 
         configuration.add_rotation_planes();
+        configuration.add_rotation_dirs();
         configuration.add_line_directions();
         configuration.add_whole_board();
         configuration.add_quadrants();

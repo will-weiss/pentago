@@ -1,9 +1,9 @@
 pub mod board;
-pub mod lattice;
-pub mod rotation_plane;
-pub mod coordinates;
-pub mod square;
-pub mod direction;
 pub mod configuration;
-pub mod state;
+pub mod coordinates;
+pub mod direction;
+pub mod lattice;
 pub mod math_utils;
+pub mod rotation_plane;
+pub mod square;
+pub mod state;

@@ -22,7 +22,6 @@ pub struct State {
 }
 
 
-
 impl State {
 
     pub fn new(cfg: Rc<Configuration>) -> State {

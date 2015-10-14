@@ -13,7 +13,6 @@ pub struct Square {
     pub b_ix: usize,
     pub q_ix: usize,
     pub s_ix: usize,
-
     pub if_white: BigUint,
     pub if_black: BigUint,
 }

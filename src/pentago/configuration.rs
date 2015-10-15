@@ -37,7 +37,7 @@ pub struct Configuration {
     square_ixs_by_quadrant: Vec<Vec<usize>>,
     quadrant_sq_rotations: Vec<Vec<usize>>,
     board_sq_rotations: Vec<Vec<usize>>,
-    all_lines: Vec<Line>,
+    pub all_lines: Vec<Line>,
     lines_by_ix: Vec<Vec<Line>>,
 }
 

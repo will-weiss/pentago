@@ -1,64 +1,27 @@
+extern crate time;
 mod pentago;
-extern crate num;
 
-use self::num::traits::ToPrimitive;
-use pentago::state::State;
 use pentago::configuration::Configuration;
-use pentago::board::Color::{Black, White};
+use self::time::get_time;
 
-
-fn val_of(gs: &State) {
-    println!("{:?}", gs.val().to_u64().unwrap());
-}
 
 fn main() {
-    let gc = Configuration::new(2, 3, 5);
+    println!("STARTED AT: {:?}", get_time());
 
-    let s0 = gc.init_state();
+    // let initial_state = Configuration::new(2, 2, 3).init_state();
 
-    println!("{:?}", s0.full_result());
+    let gc = Configuration::new(2, 2, 3);
 
-    // val_of(&s0);
+    println!("{:?}", gc.all_lines);
 
+    // let result = initial_state.full_result();
 
-    // let s1 = s0.place(0, 0, White);
+    // let states_calculated = initial_state.states_calculated();
 
-    // let s1 = s0.place(0, 2, Black);
-    // val_of(&s1);
+    // println!("THE RESULT IS: {:?}", result);
 
+    // println!("TOTAL STATES CALCULATED: {:?}", states_calculated);
 
-    // let mut s = s1.rotate_single_quadrant(0, 1);
-
-    // val_of(&s);
-
-    // s = s.rotate_single_quadrant(0, 1);
-    // val_of(&s);
-
-    // s = s.rotate_single_quadrant(0, 1);
-    // val_of(&s);
-
-    // s = s.rotate_board(1);
-    // val_of(&s);
-
-    // s = s.rotate_board(1);
-    // val_of(&s);
-
-    // s = s.rotate_board(1);
-    // val_of(&s);
-
-    // s = s.rotate_board(1);
-    // val_of(&s);
-
-
-
-
-
-
-
-    // let gs = gc.init_state();
-
-    // println!("{:?}", gs.val().to_u64());
-
+    // println!("FINISHED AT: {:?}", get_time());
 
 }
-

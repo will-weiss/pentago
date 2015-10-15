@@ -1,3 +1,4 @@
+extern crate time;
 extern crate num;
 extern crate itertools;
 
@@ -11,6 +12,9 @@ use pentago::configuration::Configuration;
 use pentago::board::{Board, Square, Space, QuadrantRef, Color, Line};
 use pentago::board::Color::{White, Black};
 pub use self::GameResult::*;
+use self::time::get_time;
+
+static mut states_calculated: u64 = 0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GameResult {
@@ -105,7 +109,6 @@ impl State {
         }).collect())
     }
 
-
     pub fn possible_placements(&self) -> Vec<State> {
         let color = self.to_move();
         let mut placement_states = vec![];
@@ -186,10 +189,23 @@ impl State {
     }
 
     pub fn full_result(&self) -> GameResult {
+        unsafe {
+            states_calculated = states_calculated + 1;
+            if states_calculated % 50000 == 0 {
+                println!("CALCULATED: {:?} STATES", states_calculated);
+                println!("TIME: {:?}", get_time());
+            }
+        }
         let current_result = self.current_result();
         match current_result {
             Some(result) => result,
             None => { self.test_for_result() }
+        }
+    }
+
+    pub fn states_calculated(&self) -> u64 {
+        unsafe {
+            states_calculated
         }
     }
 

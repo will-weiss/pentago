@@ -6,14 +6,13 @@ use self::itertools::Product;
 
 use pentago::rotation::{RotationPlanes, RotationDirs, get_all_rotation_planes, get_all_rotation_dirs};
 use pentago::direction::{LineDir, get_all_line_directions};
-use pentago::square::{Square, Squares, SquareIxs};
+use pentago::board::{Square, Squares, Line};
 use pentago::lattice::{build_lattice, Lattice};
 use pentago::coordinates::{Coordinates, coordinates_to_ix};
 use pentago::state::State;
 
 const QUADRANT_LENGTH: usize = 2;
 
-pub type Line = Vec<SquareIxs>;
 pub type Adjacency = Option<usize>;
 
 
@@ -86,8 +85,8 @@ impl Configuration {
         let mut square_adjacencies =
             vec![vec![None; self.whole_board.len()]; self.line_directions.len()];
 
-        for ((sq_ix, sq), (ld_ix, ld)) in Product::new(
-            self.squares.iter().enumerate(),
+        for (sq_ix, (ld_ix, ld)) in Product::new(
+            0..self.squares.len(),
             self.line_directions.iter().enumerate()
         ) {
             let maybe_adj_cs = self.maybe_adj_coordinates(sq_ix, ld);

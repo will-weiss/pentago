@@ -4,10 +4,10 @@ use std::ops::BitXor;
 use std::iter::Enumerate;
 use std::slice::Iter;
 use std::rc::Rc;
-use pentago::configuration::{Configuration, Line};
+use pentago::configuration::Configuration;
 use self::num::bigint::BigUint;
 use self::num::traits::Zero;
-use pentago::board::*;
+use pentago::board::{Board, Square, Space, QuadrantRef, Color, Line, init};
 use pentago::board::Color::{White, Black};
 pub use self::GameResult::*;
 
@@ -30,7 +30,7 @@ impl State {
         State {
             cfg: cfg.clone(),
             black_to_move: true,
-            board: init_board(cfg.quadrants.len(), cfg.single_quadrant.len())
+            board: init(cfg.quadrants.len(), cfg.single_quadrant.len())
         }
     }
 
@@ -66,7 +66,7 @@ impl State {
 
     pub fn val(&self) -> BigUint {
         self.cfg.squares.iter().fold(BigUint::zero(), |val, sq| {
-            let space = sq.of(&self.board);
+            let space = self.get_space(sq);
             match space {
                 None => val,
                 Some(White) => val + &sq.if_white,
@@ -81,6 +81,10 @@ impl State {
 
     fn enum_board(&self) -> Enumerate<Iter<QuadrantRef>> {
         self.board.iter().enumerate()
+    }
+
+    fn get_space(&self, sq: &Square) -> Space {
+        sq.of(&self.board)
     }
 
     fn rotate_quadrant(&self, quadrant: &QuadrantRef, direction: usize) -> QuadrantRef {
@@ -105,7 +109,7 @@ impl State {
                 let this_pt = &self.cfg.whole_board[ix];
                 let rotate_ix = this_pt.rotations[direction];
                 let rotate_sq = &self.cfg.squares[rotate_ix];
-                rotate_sq.of(&self.board).clone()
+                self.get_space(rotate_sq)
             }).collect())
         }).collect())
     }

@@ -5,5 +5,4 @@ pub mod direction;
 pub mod lattice;
 pub mod math_utils;
 pub mod rotation;
-pub mod square;
 pub mod state;

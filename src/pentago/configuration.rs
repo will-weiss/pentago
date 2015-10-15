@@ -3,10 +3,13 @@ extern crate itertools;
 
 use std::rc::Rc;
 use self::itertools::Product;
+use self::num::bigint::BigUint;
+use self::num::traits::Zero;
 
 use pentago::rotation::{RotationPlanes, RotationDirs, get_all_rotation_planes, get_all_rotation_dirs};
 use pentago::direction::{LineDir, get_all_line_directions};
-use pentago::board::{Square, Squares, Line};
+use pentago::board::{Square, Squares, Line, Board, QuadrantRef, Color};
+use pentago::board::Color::{White, Black};
 use pentago::lattice::{build_lattice, Lattice, Point};
 use pentago::coordinates::{Coordinates, coordinates_to_ix};
 use pentago::state::State;
@@ -20,22 +23,22 @@ pub type Adjacency = Option<usize>;
 
 #[derive(Debug, Clone)]
 pub struct Configuration {
-    pub dim: usize,
-    pub quadrant_length: usize,
-    pub radius: usize,
-    pub diameter: usize,
-    pub num_quadrants: usize,
-    pub squares_per: usize,
-    pub victory: usize,
-    pub line_directions: Vec<LineDir>,
-    pub rotation_planes: RotationPlanes,
-    pub rotation_dirs: RotationDirs,
-    pub squares: Squares,
-    pub square_ixs_by_quadrant: Vec<Vec<usize>>,
-    pub quadrant_rotations: Vec<Vec<usize>>,
-    pub board_rotations: Vec<Vec<usize>>,
-    pub lines_by_ix: Vec<Vec<Line>>,
-    pub all_lines: Vec<Line>,
+    dim: usize,
+    quadrant_length: usize,
+    radius: usize,
+    diameter: usize,
+    num_quadrants: usize,
+    squares_per: usize,
+    victory: usize,
+    line_directions: Vec<LineDir>,
+    rotation_planes: RotationPlanes,
+    rotation_dirs: RotationDirs,
+    squares: Squares,
+    square_ixs_by_quadrant: Vec<Vec<usize>>,
+    quadrant_rotations: Vec<Vec<usize>>,
+    board_rotations: Vec<Vec<usize>>,
+    all_lines: Vec<Line>,
+    lines_by_ix: Vec<Vec<Line>>,
 }
 
 impl Configuration {
@@ -107,6 +110,10 @@ impl Configuration {
 
     }
 
+    fn to_line(&self, line_ixs: &Vec<usize>) -> Line {
+        line_ixs.iter().map(|&ix| self.squares[ix].ixs.clone()).collect()
+    }
+
     fn add_lines_from_adjacencies(&mut self, adjs: &Vec<Adjacency>, ix: usize) -> &mut Self {
         let mut line_ixs: Vec<usize> = vec![];
         let mut ref_ix = ix;
@@ -132,10 +139,6 @@ impl Configuration {
         self
     }
 
-    fn to_line(&self, line_ixs: &Vec<usize>) -> Line {
-        line_ixs.iter().map(|&ix| self.squares[ix].ixs.clone()).collect()
-    }
-
     fn add_lines(&mut self) {
         self.lines_by_ix = vec![vec![]; self.squares.len()];
 
@@ -151,6 +154,8 @@ impl Configuration {
     pub fn new(dim: usize, radius: usize, victory: usize) -> Configuration {
 
         let mut configuration = Configuration {
+            squares: vec![],
+            all_lines: vec![],
             dim: dim,
             quadrant_length: QUADRANT_LENGTH,
             radius: radius,
@@ -163,10 +168,8 @@ impl Configuration {
             rotation_dirs: vec![],
             quadrant_rotations: vec![],
             board_rotations: vec![],
-            squares: vec![],
             square_ixs_by_quadrant: vec![],
             lines_by_ix: vec![],
-            all_lines: vec![],
         };
 
         configuration.add_planes_dirs();
@@ -181,6 +184,10 @@ impl Configuration {
         State::new(Rc::new(self))
     }
 
+    pub fn init_board(&self) -> Board {
+        vec![Rc::new(vec![None; self.squares_per]); self.num_quadrants]
+    }
+
     pub fn get_board_rotation_sq(&self, q_ix: usize, s_ix: usize, direction: usize) -> &Square {
         let ix = self.square_ixs_by_quadrant[q_ix][s_ix];
         let rotate_ix = self.board_rotations[ix][direction];
@@ -191,5 +198,33 @@ impl Configuration {
         self.quadrant_rotations[s_ix][direction]
     }
 
+    pub fn test_line(&self, board: &Board, color: Color, line: &Line) -> bool {
+        line.iter()
+            .map(|&(q_ix, s_ix)| board[q_ix][s_ix])
+            .all(|space| space == Some(color))
+    }
+
+    fn test_lines(&self, board: &Board, color: Color, lines: &Vec<Line>) -> bool {
+        lines.iter().any(|line| self.test_line(board, color, line))
+    }
+
+    pub fn test_color(&self, board: &Board, color: Color) -> bool {
+        self.test_lines(board, color, &self.all_lines)
+    }
+
+    pub fn test_square(&self, board: &Board, color: Color, ix: usize) -> bool {
+        self.test_lines(board, color, &self.lines_by_ix[ix])
+    }
+
+    pub fn get_state_val(&self, state: &State) -> BigUint {
+        self.squares.iter().fold(BigUint::zero(), |val, sq| {
+            let space = state.get_space(sq);
+            match space {
+                None => val,
+                Some(White) => val + &sq.if_white,
+                Some(Black) => val + &sq.if_black
+            }
+        })
+    }
 
 }

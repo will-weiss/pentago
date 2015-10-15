@@ -1,5 +1,4 @@
 extern crate num;
-extern crate itertools;
 
 use std::rc::Rc;
 use self::num::bigint::BigUint;
@@ -32,12 +31,4 @@ impl Square {
         let (q_ix, s_ix) = self.ixs;
         board[q_ix][s_ix]
     }
-}
-
-fn init_quadrant(sq_len: usize) -> Quadrant {
-    vec![None; sq_len]
-}
-
-pub fn init(qs_len: usize, sq_len: usize) -> Board {
-    vec![Rc::new(init_quadrant(sq_len)); qs_len]
 }

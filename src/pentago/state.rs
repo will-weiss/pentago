@@ -4,10 +4,9 @@ use std::ops::BitXor;
 use std::iter::Enumerate;
 use std::slice::Iter;
 use std::rc::Rc;
-use pentago::configuration::Configuration;
 use self::num::bigint::BigUint;
-use self::num::traits::Zero;
-use pentago::board::{Board, Square, Space, QuadrantRef, Color, Line, init};
+use pentago::configuration::Configuration;
+use pentago::board::{Board, Square, Space, QuadrantRef, Color, Line};
 use pentago::board::Color::{White, Black};
 pub use self::GameResult::*;
 
@@ -19,9 +18,9 @@ pub enum GameResult {
 
 #[derive(Debug, Clone)]
 pub struct State {
-    pub cfg: Rc<Configuration>,
-    pub black_to_move: bool,
-    pub board: Board
+    cfg: Rc<Configuration>,
+    black_to_move: bool,
+    board: Board
 }
 
 impl State {
@@ -30,18 +29,12 @@ impl State {
         State {
             cfg: cfg.clone(),
             black_to_move: true,
-            board: init(cfg.num_quadrants, cfg.squares_per)
+            board: cfg.init_board()
         }
     }
 
-    fn test_line(&self, line: &Line, color: Color) -> bool {
-        line.iter()
-            .map(|&(q_ix, s_ix)| self.board[q_ix][s_ix])
-            .all(|space| space == Some(color))
-    }
-
     fn test_color(&self, color: Color) -> bool {
-        self.cfg.all_lines.iter().any(|line| self.test_line(line, color))
+        self.cfg.test_color(&self.board, color)
     }
 
     pub fn get_result(&self) -> Option<GameResult> {
@@ -65,25 +58,18 @@ impl State {
     }
 
     pub fn val(&self) -> BigUint {
-        self.cfg.squares.iter().fold(BigUint::zero(), |val, sq| {
-            let space = self.get_space(sq);
-            match space {
-                None => val,
-                Some(White) => val + &sq.if_white,
-                Some(Black) => val + &sq.if_black
-            }
-        })
+        self.cfg.get_state_val(&self)
     }
 
     fn to_move(&self) -> Color {
-        if (self.black_to_move) { Black } else { White }
+        if self.black_to_move { Black } else { White }
     }
 
     fn enum_board(&self) -> Enumerate<Iter<QuadrantRef>> {
         self.board.iter().enumerate()
     }
 
-    fn get_space(&self, sq: &Square) -> Space {
+    pub fn get_space(&self, sq: &Square) -> Space {
         sq.of(&self.board)
     }
 

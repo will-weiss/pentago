@@ -8,7 +8,6 @@ pub enum DimDir {
 }
 
 impl DimDir {
-
     pub fn as_i32(&self) -> i32 {
         match *self {
             Null => 0,
@@ -16,7 +15,6 @@ impl DimDir {
             Backward => -1
         }
     }
-
 }
 
 pub type LineDir = Vec<DimDir>;

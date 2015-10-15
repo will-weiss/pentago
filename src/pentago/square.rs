@@ -6,13 +6,13 @@ use self::itertools::Product;
 
 use pentago::math_utils::{three_raised_to, mult2};
 use pentago::configuration::Configuration;
+use pentago::board::{Board, Space};
 
+pub type SquareIxs = (usize, usize);
 
 #[derive(Debug, Clone)]
 pub struct Square {
-    pub b_ix: usize,
-    pub q_ix: usize,
-    pub s_ix: usize,
+    pub ixs: SquareIxs,
     pub if_white: BigUint,
     pub if_black: BigUint,
 }
@@ -21,23 +21,19 @@ pub type Squares = Vec<Square>;
 
 impl Square {
 
-    pub fn all(cfg: &Configuration) -> Squares {
-        (cfg.whole_board.iter().enumerate()).zip(Product::new(
-            cfg.quadrants.iter().enumerate(),
-            cfg.single_quadrant.iter().enumerate()
-        )).map(|((b_ix, b_pt), ((q_ix, q_pt), (s_ix, s_pt)))| {
-
-            let if_white = three_raised_to(b_ix);
-            let if_black = mult2(if_white.clone());
-
+    pub fn all(num_qs: usize, num_sq: usize) -> Squares {
+        Product::new(0..num_qs, 0..num_sq).enumerate().map(|(b_ix, ixs)| {
             Square {
-                b_ix: b_ix,
-                q_ix: q_ix,
-                s_ix: s_ix,
-                if_white: if_white,
-                if_black: if_black
+                ixs: ixs,
+                if_white: three_raised_to(b_ix),
+                if_black: mult2(three_raised_to(b_ix))
             }
         }).collect()
+    }
+
+    pub fn of(&self, board: &Board) -> Space {
+        let (q_ix, s_ix) = self.ixs;
+        board[q_ix][s_ix]
     }
 
 }

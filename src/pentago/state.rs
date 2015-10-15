@@ -66,7 +66,7 @@ impl State {
 
     pub fn val(&self) -> BigUint {
         self.cfg.squares.iter().fold(BigUint::zero(), |val, sq| {
-            let space = self.board[sq.q_ix][sq.s_ix];
+            let space = sq.of(&self.board);
             match space {
                 None => val,
                 Some(White) => val + &sq.if_white,
@@ -105,7 +105,7 @@ impl State {
                 let this_pt = &self.cfg.whole_board[ix];
                 let rotate_ix = this_pt.rotations[direction];
                 let rotate_sq = &self.cfg.squares[rotate_ix];
-                self.board[rotate_sq.q_ix][rotate_sq.s_ix].clone()
+                rotate_sq.of(&self.board).clone()
             }).collect())
         }).collect())
     }

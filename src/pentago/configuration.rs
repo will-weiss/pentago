@@ -32,11 +32,11 @@ pub struct Configuration {
     victory: usize,
     line_directions: Vec<LineDir>,
     rotation_planes: RotationPlanes,
-    rotation_dirs: RotationDirs,
+    pub rotation_dirs: RotationDirs,
     squares: Squares,
     square_ixs_by_quadrant: Vec<Vec<usize>>,
-    quadrant_rotations: Vec<Vec<usize>>,
-    board_rotations: Vec<Vec<usize>>,
+    quadrant_sq_rotations: Vec<Vec<usize>>,
+    board_sq_rotations: Vec<Vec<usize>>,
     all_lines: Vec<Line>,
     lines_by_ix: Vec<Vec<Line>>,
 }
@@ -47,8 +47,8 @@ impl Configuration {
         self.line_directions = get_all_line_directions(self.dim);
         self.rotation_planes = get_all_rotation_planes(self.dim);
         self.rotation_dirs = get_all_rotation_dirs(&self.rotation_planes);
-        self.quadrant_rotations = self.rotations_of(self.radius);
-        self.board_rotations = self.rotations_of(self.diameter);
+        self.quadrant_sq_rotations = self.rotations_of(self.radius);
+        self.board_sq_rotations = self.rotations_of(self.diameter);
     }
 
     fn rotations_of(&self, length: usize) -> Vec<Vec<usize>> {
@@ -166,8 +166,8 @@ impl Configuration {
             line_directions: vec![],
             rotation_planes: vec![],
             rotation_dirs: vec![],
-            quadrant_rotations: vec![],
-            board_rotations: vec![],
+            quadrant_sq_rotations: vec![],
+            board_sq_rotations: vec![],
             square_ixs_by_quadrant: vec![],
             lines_by_ix: vec![],
         };
@@ -190,12 +190,12 @@ impl Configuration {
 
     pub fn get_board_rotation_sq(&self, q_ix: usize, s_ix: usize, direction: usize) -> &Square {
         let ix = self.square_ixs_by_quadrant[q_ix][s_ix];
-        let rotate_ix = self.board_rotations[ix][direction];
+        let rotate_ix = self.board_sq_rotations[ix][direction];
         &self.squares[rotate_ix]
     }
 
     pub fn get_quadrant_rotation_ix(&self, s_ix: usize, direction: usize) -> usize {
-        self.quadrant_rotations[s_ix][direction]
+        self.quadrant_sq_rotations[s_ix][direction]
     }
 
     pub fn test_line(&self, board: &Board, color: Color, line: &Line) -> bool {

@@ -16,7 +16,7 @@ fn main() {
 
     let s0 = gc.init_state();
 
-    println!("{:?}", s0.get_result());
+    println!("{:?}", s0.full_result());
 
     // val_of(&s0);
 

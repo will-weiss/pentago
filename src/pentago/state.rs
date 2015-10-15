@@ -1,9 +1,11 @@
 extern crate num;
+extern crate itertools;
 
+use std::rc::Rc;
 use std::ops::BitXor;
 use std::iter::Enumerate;
 use std::slice::Iter;
-use std::rc::Rc;
+use self::itertools::Product;
 use self::num::bigint::BigUint;
 use pentago::configuration::Configuration;
 use pentago::board::{Board, Square, Space, QuadrantRef, Color, Line};
@@ -30,22 +32,6 @@ impl State {
             cfg: cfg.clone(),
             black_to_move: true,
             board: cfg.init_board()
-        }
-    }
-
-    fn test_color(&self, color: Color) -> bool {
-        self.cfg.test_color(&self.board, color)
-    }
-
-    pub fn get_result(&self) -> Option<GameResult> {
-        let black_has_line = self.test_color(Black);
-        let white_has_line = self.test_color(White);
-
-        match (black_has_line, white_has_line) {
-            (false, false) => None,
-            (true, false) => Some(Win(Black)),
-            (false, true) => Some(Win(White)),
-            (true, true) => Some(Draw),
         }
     }
 
@@ -87,6 +73,15 @@ impl State {
         }).collect())
     }
 
+    pub fn possible_rotations(&self) -> Vec<State> {
+        Product::new(
+            0..self.board.len(),
+            0..self.cfg.rotation_dirs.len()
+        ).map(|(rotate_q_ix, direction)| {
+            self.rotate_single_quadrant(rotate_q_ix, direction)
+        }).collect()
+    }
+
     pub fn rotate_board(&self, direction: usize) -> State {
         self.transition(false, self.enum_board().map(|(q_ix, quadrant)| {
             Rc::new((0..quadrant.len()).map(|s_ix| {
@@ -110,6 +105,7 @@ impl State {
         }).collect())
     }
 
+
     pub fn possible_placements(&self) -> Vec<State> {
         let color = self.to_move();
         let mut placement_states = vec![];
@@ -124,6 +120,77 @@ impl State {
 
         placement_states
 
+    }
+
+    fn test_color(&self, color: Color) -> bool {
+        self.cfg.test_color(&self.board, color)
+    }
+
+    pub fn current_result(&self) -> Option<GameResult> {
+        let black_has_line = self.test_color(Black);
+        let white_has_line = self.test_color(White);
+
+        match (black_has_line, white_has_line) {
+            (false, false) => None,
+            (true, false) => Some(Win(Black)),
+            (false, true) => Some(Win(White)),
+            (true, true) => Some(Draw),
+        }
+    }
+
+    fn test_rotation_states(&self, to_move: Color) -> GameResult {
+        let mut draw_seen = false;
+        for rotation_state in self.possible_rotations() {
+            match rotation_state.full_result() {
+                Draw => { draw_seen = true; },
+                Win(color) => {
+                    if color == to_move { return Win(to_move) }
+                }
+            }
+        }
+        if draw_seen { Draw }
+        else {
+            match to_move {
+                Black => Win(White),
+                White => Win(Black),
+            }
+        }
+    }
+
+    fn test_for_result(&self) -> GameResult {
+        let possible_placements = self.possible_placements();
+        if possible_placements.len() == 0 { Draw }
+        else {
+            let to_move = self.to_move();
+            let mut draw_seen = false;
+
+            for placement_state in possible_placements.iter() {
+                if placement_state.test_color(to_move) { return Win(to_move) }
+                else {
+                    match placement_state.test_rotation_states(to_move) {
+                        Draw => { draw_seen = true; },
+                        Win(color) => {
+                            if color == to_move { return Win(to_move) }
+                        }
+                    }
+                }
+            }
+            if draw_seen { Draw }
+            else {
+                match to_move {
+                    Black => Win(White),
+                    White => Win(Black),
+                }
+            }
+        }
+    }
+
+    pub fn full_result(&self) -> GameResult {
+        let current_result = self.current_result();
+        match current_result {
+            Some(result) => result,
+            None => { self.test_for_result() }
+        }
     }
 
 }

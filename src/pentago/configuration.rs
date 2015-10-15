@@ -7,9 +7,11 @@ use self::itertools::Product;
 use pentago::rotation::{RotationPlanes, RotationDirs, get_all_rotation_planes, get_all_rotation_dirs};
 use pentago::direction::{LineDir, get_all_line_directions};
 use pentago::board::{Square, Squares, Line};
-use pentago::lattice::{build_lattice, Lattice};
+use pentago::lattice::{build_lattice, Lattice, Point};
 use pentago::coordinates::{Coordinates, coordinates_to_ix};
 use pentago::state::State;
+use pentago::math_utils::{three_raised_to, mult2};
+
 
 const QUADRANT_LENGTH: usize = 2;
 
@@ -19,18 +21,19 @@ pub type Adjacency = Option<usize>;
 #[derive(Debug, Clone)]
 pub struct Configuration {
     pub dim: usize,
-    pub radius: usize,
     pub quadrant_length: usize,
+    pub radius: usize,
     pub diameter: usize,
+    pub num_quadrants: usize,
+    pub squares_per: usize,
     pub victory: usize,
     pub line_directions: Vec<LineDir>,
     pub rotation_planes: RotationPlanes,
     pub rotation_dirs: RotationDirs,
-    pub whole_board: Lattice,
-    pub quadrants: Lattice,
-    pub single_quadrant: Lattice,
     pub squares: Squares,
-    pub square_ix_by_quadrant: Vec<Vec<usize>>,
+    pub square_ixs_by_quadrant: Vec<Vec<usize>>,
+    pub quadrant_rotations: Vec<Vec<usize>>,
+    pub board_rotations: Vec<Vec<usize>>,
     pub lines_by_ix: Vec<Vec<Line>>,
     pub all_lines: Vec<Line>,
 }
@@ -41,28 +44,31 @@ impl Configuration {
         self.line_directions = get_all_line_directions(self.dim);
         self.rotation_planes = get_all_rotation_planes(self.dim);
         self.rotation_dirs = get_all_rotation_dirs(&self.rotation_planes);
+        self.quadrant_rotations = self.rotations_of(self.radius);
+        self.board_rotations = self.rotations_of(self.diameter);
+    }
+
+    fn rotations_of(&self, length: usize) -> Vec<Vec<usize>> {
+        self.lattice(length).iter().map(|pt| pt.rotations.clone()).collect()
     }
 
     fn lattice(&self, length: usize) -> Lattice {
         build_lattice(&self.rotation_dirs, self.dim, length)
     }
 
-    fn add_lattices(&mut self) {
-        self.whole_board = self.lattice(self.diameter);
-        self.quadrants = self.lattice(self.quadrant_length);
-        self.single_quadrant = self.lattice(self.radius);
-    }
-
     fn add_square_fields(&mut self) {
-        self.squares = Square::all(self.quadrants.len(), self.single_quadrant.len());
 
-        self.square_ix_by_quadrant =
-            vec![vec![0; self.single_quadrant.len()]; self.quadrants.len()];
+        self.square_ixs_by_quadrant = vec![vec![0; self.squares_per]; self.num_quadrants];
 
-        for (ix, sq) in (&self.squares).iter().enumerate() {
-            let (q_ix, s_ix) = sq.ixs;
-            self.square_ix_by_quadrant[q_ix][s_ix] = ix;
-        }
+        self.squares = Product::new(0..self.num_quadrants, 0..self.squares_per).enumerate()
+            .map(|(b_ix, (q_ix, s_ix))| {
+                self.square_ixs_by_quadrant[q_ix][s_ix] = b_ix;
+                Square {
+                    ixs: (q_ix, s_ix),
+                    if_white: three_raised_to(b_ix),
+                    if_black: mult2(three_raised_to(b_ix))
+                }
+            }).collect()
     }
 
     fn coordinates_out_of_bounds(&self, cs: &Vec<i32>) -> bool {
@@ -71,8 +77,8 @@ impl Configuration {
         )
     }
 
-    fn maybe_adj_coordinates(&self, sq_ix: usize, ld: &LineDir) -> Option<Coordinates> {
-        let adj_cs: Vec<i32> = self.whole_board[sq_ix].coordinates.iter()
+    fn maybe_adj_coordinates(&self, pt: &Point, ld: &LineDir) -> Option<Coordinates> {
+        let adj_cs: Vec<i32> = pt.coordinates.iter()
             .zip(ld).map(|(coordinate, dim_dir)| {
                 (coordinate.clone() as i32) + dim_dir.as_i32()
             }).collect();
@@ -81,15 +87,16 @@ impl Configuration {
     }
 
     fn get_square_adjacencies(&self) -> Vec<Vec<Adjacency>> {
+        let whole_board = self.lattice(self.diameter);
 
         let mut square_adjacencies =
-            vec![vec![None; self.whole_board.len()]; self.line_directions.len()];
+            vec![vec![None; self.squares.len()]; self.line_directions.len()];
 
         for (sq_ix, (ld_ix, ld)) in Product::new(
             0..self.squares.len(),
             self.line_directions.iter().enumerate()
         ) {
-            let maybe_adj_cs = self.maybe_adj_coordinates(sq_ix, ld);
+            let maybe_adj_cs = self.maybe_adj_coordinates(&whole_board[sq_ix], ld);
             if let Some(adj_cs) = maybe_adj_cs {
                 let adj_ix = coordinates_to_ix(adj_cs, self.diameter);
                 square_adjacencies[ld_ix][sq_ix] = Some(adj_ix);
@@ -145,24 +152,24 @@ impl Configuration {
 
         let mut configuration = Configuration {
             dim: dim,
-            radius: radius,
             quadrant_length: QUADRANT_LENGTH,
+            radius: radius,
             diameter: radius * QUADRANT_LENGTH,
+            num_quadrants: (2usize).pow(dim as u32),
+            squares_per: (radius).pow(dim as u32),
             victory: victory,
             line_directions: vec![],
             rotation_planes: vec![],
             rotation_dirs: vec![],
-            whole_board: vec![],
-            quadrants: vec![],
-            single_quadrant: vec![],
+            quadrant_rotations: vec![],
+            board_rotations: vec![],
             squares: vec![],
-            square_ix_by_quadrant: vec![],
+            square_ixs_by_quadrant: vec![],
             lines_by_ix: vec![],
             all_lines: vec![],
         };
 
         configuration.add_planes_dirs();
-        configuration.add_lattices();
         configuration.add_square_fields();
         configuration.add_lines();
 
@@ -173,5 +180,16 @@ impl Configuration {
     pub fn init_state(self) -> State {
         State::new(Rc::new(self))
     }
+
+    pub fn get_board_rotation_sq(&self, q_ix: usize, s_ix: usize, direction: usize) -> &Square {
+        let ix = self.square_ixs_by_quadrant[q_ix][s_ix];
+        let rotate_ix = self.board_rotations[ix][direction];
+        &self.squares[rotate_ix]
+    }
+
+    pub fn get_quadrant_rotation_ix(&self, s_ix: usize, direction: usize) -> usize {
+        self.quadrant_rotations[s_ix][direction]
+    }
+
 
 }

@@ -30,13 +30,13 @@ impl State {
         State {
             cfg: cfg.clone(),
             black_to_move: true,
-            board: init(cfg.quadrants.len(), cfg.single_quadrant.len())
+            board: init(cfg.num_quadrants, cfg.squares_per)
         }
     }
 
     fn test_line(&self, line: &Line, color: Color) -> bool {
         line.iter()
-            .map(|&(q_ix, s_ix)| self.board[q_ix][s_ix] )
+            .map(|&(q_ix, s_ix)| self.board[q_ix][s_ix])
             .all(|space| space == Some(color))
     }
 
@@ -44,7 +44,7 @@ impl State {
         self.cfg.all_lines.iter().any(|line| self.test_line(line, color))
     }
 
-    fn get_result(&self) -> Option<GameResult> {
+    pub fn get_result(&self) -> Option<GameResult> {
         let black_has_line = self.test_color(Black);
         let white_has_line = self.test_color(White);
 
@@ -89,15 +89,14 @@ impl State {
 
     fn rotate_quadrant(&self, quadrant: &QuadrantRef, direction: usize) -> QuadrantRef {
         Rc::new((0..quadrant.len()).map(|s_ix| {
-            let this_pt = &self.cfg.single_quadrant[s_ix];
-            let rotate_ix = this_pt.rotations[direction];
+            let rotate_ix = self.cfg.get_quadrant_rotation_ix(s_ix, direction);
             quadrant[rotate_ix].clone()
         }).collect())
     }
 
-    pub fn rotate_single_quadrant(&self, rotate_q: usize, direction: usize) -> State {
+    pub fn rotate_single_quadrant(&self, rotate_q_ix: usize, direction: usize) -> State {
         self.transition(false, self.enum_board().map(|(q_ix, quadrant)| {
-            if rotate_q != q_ix { quadrant.clone() }
+            if rotate_q_ix != q_ix { quadrant.clone() }
             else { self.rotate_quadrant(quadrant, direction) }
         }).collect())
     }
@@ -105,10 +104,7 @@ impl State {
     pub fn rotate_board(&self, direction: usize) -> State {
         self.transition(false, self.enum_board().map(|(q_ix, quadrant)| {
             Rc::new((0..quadrant.len()).map(|s_ix| {
-                let ix = self.cfg.square_ix_by_quadrant[q_ix][s_ix];
-                let this_pt = &self.cfg.whole_board[ix];
-                let rotate_ix = this_pt.rotations[direction];
-                let rotate_sq = &self.cfg.squares[rotate_ix];
+                let rotate_sq = self.cfg.get_board_rotation_sq(q_ix, s_ix, direction);
                 self.get_space(rotate_sq)
             }).collect())
         }).collect())

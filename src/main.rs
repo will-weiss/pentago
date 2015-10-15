@@ -14,14 +14,10 @@ fn val_of(gs: &State) {
 fn main() {
     let gc = Configuration::new(2, 3, 5);
 
-    for lines in gc.lines_by_ix {
-        println!("LINES\n");
-        for l in lines {
-            println!("{:?}", l);
-        }
-    }
+    let s0 = gc.init_state();
 
-    // let s0 = gc.init_state();
+    println!("{:?}", s0.get_result());
+
     // val_of(&s0);
 
 

@@ -1,5 +1,7 @@
 pub use self::DimDir::*;
 
+pub type LineDir = Vec<DimDir>;
+
 #[derive(Debug, Clone, Copy)]
 pub enum DimDir {
     Null,
@@ -7,17 +9,6 @@ pub enum DimDir {
     Backward
 }
 
-impl DimDir {
-    pub fn as_i32(&self) -> i32 {
-        match *self {
-            Null => 0,
-            Forward => 1,
-            Backward => -1
-        }
-    }
-}
-
-pub type LineDir = Vec<DimDir>;
 
 fn init_line_direction(prior_dim: usize) -> LineDir {
     let mut ld = vec![Null; prior_dim];

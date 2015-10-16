@@ -8,11 +8,13 @@ use self::time::get_time;
 fn main() {
     println!("STARTED AT: {:?}", get_time());
 
+    println!("{:?}", Configuration::new(2, 2, 3));
+
     // let initial_state = Configuration::new(2, 2, 3).init_state();
 
-    let gc = Configuration::new(2, 2, 3);
+    // // let gc = Configuration::new(2, 2, 3);
 
-    println!("{:?}", gc.all_lines);
+    // // println!("{:?}", gc.all_lines);
 
     // let result = initial_state.full_result();
 

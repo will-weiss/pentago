@@ -66,11 +66,7 @@ impl Configuration {
         self.squares = Product::new(0..self.num_quadrants, 0..self.squares_per).enumerate()
             .map(|(b_ix, (q_ix, s_ix))| {
                 self.square_ixs_by_quadrant[q_ix][s_ix] = b_ix;
-                Square {
-                    ixs: (q_ix, s_ix),
-                    if_white: three_raised_to(b_ix),
-                    if_black: mult2(three_raised_to(b_ix))
-                }
+                (q_ix, s_ix)
             }).collect()
     }
 
@@ -111,7 +107,7 @@ impl Configuration {
     }
 
     fn to_line(&self, line_ixs: &Vec<usize>) -> Line {
-        line_ixs.iter().map(|&ix| self.squares[ix].ixs.clone()).collect()
+        line_ixs.iter().map(|&ix| self.squares[ix].clone()).collect()
     }
 
     fn add_lines_from_adjacencies(&mut self, adjs: &Vec<Adjacency>, ix: usize) -> &mut Self {
@@ -185,7 +181,7 @@ impl Configuration {
     }
 
     pub fn init_board(&self) -> Board {
-        vec![Rc::new(vec![None; self.squares_per]); self.num_quadrants]
+        Board::blank(self.squares_per, self.num_quadrants)
     }
 
     pub fn get_board_rotation_sq(&self, q_ix: usize, s_ix: usize, direction: usize) -> &Square {
@@ -198,9 +194,18 @@ impl Configuration {
         self.quadrant_sq_rotations[s_ix][direction]
     }
 
+    pub fn get_quadrant_rotations(&self, state: &State) -> Vec<State> {
+        Product::new(
+            (0..self.num_quadrants),
+            (0..self.rotation_dirs.len())
+        ).map(|(rotate_q_ix, direction)| {
+            state.rotate_single_quadrant(rotate_q_ix, direction)
+        }).collect()
+    }
+
     pub fn test_line(&self, board: &Board, color: Color, line: &Line) -> bool {
         line.iter()
-            .map(|&(q_ix, s_ix)| board[q_ix][s_ix])
+            .map(|sq| board.get_space(sq))
             .all(|space| space == Some(color))
     }
 
@@ -216,15 +221,15 @@ impl Configuration {
         self.test_lines(board, color, &self.lines_by_ix[ix])
     }
 
-    pub fn get_state_val(&self, state: &State) -> BigUint {
-        self.squares.iter().fold(BigUint::zero(), |val, sq| {
-            let space = state.get_space(sq);
-            match space {
-                None => val,
-                Some(White) => val + &sq.if_white,
-                Some(Black) => val + &sq.if_black
-            }
-        })
-    }
+    // pub fn get_state_val(&self, state: &State) -> BigUint {
+    //     self.squares.iter().fold(BigUint::zero(), |val, sq| {
+    //         let space = state.get_space(sq);
+    //         match space {
+    //             None => val,
+    //             Some(White) => val + &sq.if_white,
+    //             Some(Black) => val + &sq.if_black
+    //         }
+    //     })
+    // }
 
 }

@@ -7,15 +7,13 @@ use pentago::configuration::Configuration;
 use pentago::board::Color::{Black, White};
 
 
-fn val_of(gs: &State) {
-    println!("{:?}", gs.val().to_u64().unwrap());
-}
-
 fn main() {
     let gc = Configuration::new(2, 3, 5);
 
+
     let s0 = gc.init_state();
 
+    println!("{:?}", s0);
     println!("{:?}", s0.full_result());
 
     // val_of(&s0);

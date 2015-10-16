@@ -43,35 +43,6 @@ pub struct BoardCfg {
 }
 
 
-impl BoardCfg {
-
-    pub fn all(dim: Dimension, radius: Length) -> BoardCfg {
-        let single_quadrant = Lattice::new(dim, radius);
-        let quadrants = Lattice::new(dim, QUADRANT_LENGTH);
-
-        let squares = Product::new(
-            single_quadrant.enum_pts(),
-            quadrants.enum_pts()
-        ).map(|((q_ix, q_pt), (p_ix, p_pt))| {
-            Square {
-                ixs: (q_ix, p_ix),
-                point: q_pt.iter().zip(p_pt).map(|(q_coordinate, p_coordinate)| {
-                    p_coordinate + (q_coordinate * radius)
-                }).collect()
-            }
-        });
-
-        BoardCfg {
-            dim: dim,
-            radius: radius,
-            num_qs: quadrants.len(),
-            single_quadrant: single_quadrant,
-            squares: squares,
-        }
-
-    }
-}
-
 fn nonzero_spins(dim: Dimension) -> Vec<Spin> {
     let prior_dim = dim - 1;
     let mut all_spins = vec![];
@@ -120,6 +91,24 @@ pub fn get_rotations(lattice: &Lattice, rotation_dirs: &RotationDirs) -> Vec<Vec
     }).collect()
 }
 
+fn all_squares(dim: Dimension, radius: Length) -> Vec<Square> {
+    let single_quadrant = Lattice::new(dim, radius);
+    let quadrants = Lattice::new(dim, QUADRANT_LENGTH);
+
+    Product::new(
+        single_quadrant.enum_pts(),
+        quadrants.enum_pts()
+    ).map(|((q_ix, q_pt), (p_ix, p_pt))| {
+        Square {
+            ixs: (q_ix, p_ix),
+            point: q_pt.iter().zip(p_pt).map(|(q_coordinate, p_coordinate)| {
+                p_coordinate + (q_coordinate * radius)
+            }).collect()
+        }
+    })
+}
+
+
 pub type Spinner {
     pub single_quadrant_rotations: Vec<PositionIx>,
     pub whole_board_rotations: Vec<Vec<Vec<SquareIxs>>>,
@@ -127,16 +116,31 @@ pub type Spinner {
 
 
 impl Spinner {
-    pub fn new(cfg: &BoardCfg) -> Spinner {
+    pub fn new(dim: Dimension, radius: Length) -> Spinner {
 
-        let rotation_planes = get_all_rotation_planes(cfg.dim);
+        let rotation_planes = get_all_rotation_planes(dim);
         let rotation_dirs = get_all_rotation_dirs(&rotation_planes);
-        let spins = get_all_spins(cfg.dim);
+        let spins = get_all_spins(dim);
 
-        let single_quadrant_rotations = get_rotations(cfg.single_quadrant, rotation_dirs);
+        let squares = all_squares(dim, radius);
+
+        let single_quadrant_rotations = squares.iter().enumerate().map(|pt| {
+            rotation_dirs.iter().map(|&(d_i, d_j)| {
+                let mut rotated_point = lattice.points[ix].clone();
+                rotated_point[d_i] = lattice.length - 1 - point[d_j];
+                rotated_point[d_j] = point[d_i];
+                lattice.ix_of_point(rotated_point)
+            }).collect()
+        }).collect()
+
+
+
+
         let mut whole_board_rotations = vec![vec![vec![]; cfg.single_quadrant.len()]; cfg.num_qs];
 
-        get_rotations(cfg.squares).iter().enumerate().map(|ix, sq|)
+        get_rotations(cfg.squares).iter().enumerate().map(|ix, sq| {
+
+        })
 
 
         .map(|(rd_ix, rotations)| {

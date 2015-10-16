@@ -4,7 +4,7 @@ use self::itertools::Product;
 
 use pentago::lattice::{Lattice, Dimension, Length, Point, PointIx};
 
-use pentago::direction::*
+use pentago::direction::*;
 
 type DimOrder = Vec<Dimension>;
 
@@ -33,13 +33,13 @@ pub struct Square {
     point: Point,
 }
 
-
 pub struct BoardCfg {
     pub dim: Dimension,
     pub radius: Length,
     pub num_qs: usize,
     pub single_quadrant: Lattice,
     pub squares: Vec<Square>,
+    pub squares_by_ixs: Vec<Vec<usize>>,
 }
 
 
@@ -95,9 +95,9 @@ fn all_squares(dim: Dimension, radius: Length) -> Vec<Square> {
     let single_quadrant = Lattice::new(dim, radius);
     let quadrants = Lattice::new(dim, QUADRANT_LENGTH);
 
-    Product::new(
-        single_quadrant.enum_pts(),
-        quadrants.enum_pts()
+    let squares = Product::new(
+        quadrants.enum_pts(),
+        single_quadrant.enum_pts()
     ).map(|((q_ix, q_pt), (p_ix, p_pt))| {
         Square {
             ixs: (q_ix, p_ix),
@@ -105,11 +105,22 @@ fn all_squares(dim: Dimension, radius: Length) -> Vec<Square> {
                 p_coordinate + (q_coordinate * radius)
             }).collect()
         }
-    })
+    });
+
+    let mut squares_by_ixs = vec![vec![0; single_quadrant.points.len()]; quadrants.points.len()]
+
+    squares.iter().enumerate().map(|(ix, sq)| {
+        let (q_ix, p_ix) = sq;
+        squares_by_ixs[q_ix][p_ix] = ix
+    }).collect();
+
+
+
+
 }
 
 
-pub type Spinner {
+pub struct Spinner {
     pub single_quadrant_rotations: Vec<PositionIx>,
     pub whole_board_rotations: Vec<Vec<Vec<SquareIxs>>>,
 }
@@ -131,9 +142,7 @@ impl Spinner {
                 rotated_point[d_j] = point[d_i];
                 lattice.ix_of_point(rotated_point)
             }).collect()
-        }).collect()
-
-
+        }).collect();
 
 
         let mut whole_board_rotations = vec![vec![vec![]; cfg.single_quadrant.len()]; cfg.num_qs];
@@ -169,28 +178,29 @@ impl LineCfg {
         let line_dirs = get_all_line_directions(cfg.dim);
         let mut all_lines = vec![];
         let mut lines_by_ix = vec![vec![vec![]; cfg.quadrants.len()]; cfg.single_quadrant.len()];
-
-        cfg.whole_board.enum_pts().map(|(point_ix, point)| {
-            for ld in line_dirs {
-                for (i, dim_dir)
-
-                adj_cs: Vec<i32> = pt.coordinates.iter()
-                    .zip(ld).map(|(coordinate, dim_dir)| {
-                        (coordinate.clone() as i32) + dim_dir.as_i32()
-                    }).collect();
-            }
-
-
-        match *self {
-            Null => 0,
-            Forward => 1,
-            Backward => -1
-        }
     }
 
+    //     cfg.whole_board.enum_pts().map(|(point_ix, point)| {
+    //         for ld in line_dirs {
+    //             for (i, dim_dir)
 
-        }).collect();
-    }
+    //             adj_cs: Vec<i32> = pt.coordinates.iter()
+    //                 .zip(ld).map(|(coordinate, dim_dir)| {
+    //                     (coordinate.clone() as i32) + dim_dir.as_i32()
+    //                 }).collect();
+    //         }
+
+
+    //     match *self {
+    //         Null => 0,
+    //         Forward => 1,
+    //         Backward => -1
+    //     }
+    // }
+
+
+    //     }).collect();
+    // }
 }
 
 

@@ -6,7 +6,7 @@ use std::iter::{Enumerate, Map};
 
 type Dimension = usize;
 type Coordinate = usize;
-type Length: usize;
+type Length = usize;
 type PointIx = usize;
 
 pub type RotationPlane = (Dimension, Dimension);
